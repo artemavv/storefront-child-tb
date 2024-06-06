@@ -1,0 +1,122 @@
+.post-page {
+    padding: 40px 0;
+}
+
+.post-item {
+
+    &__content {
+        margin: auto;
+        width: 100%;
+        max-width: 730px;
+
+        #vk_subscribe {
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-weight: normal;
+            font-size: 16px;
+            line-height: 1.6;
+            color: $gray;
+        }
+
+        ul, ol {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+            color: $gray;
+
+
+            li {
+                position: relative;
+                margin-bottom: 15px;
+            }
+        }
+
+        ul li::after {
+            content: '';
+            position: absolute;
+            top: 7px;
+            left: -40px;
+            width: 13px;
+            height: 13px;
+            background-color: $violet;
+            border-radius: 50%;
+        }
+
+        h2, h3 {
+            margin: 0 0 20px;
+            font-family: $lato;
+            font-weight: bold;
+            font-size: 24px;
+            line-height: 30px;
+            color: $dark-gray;
+        }
+
+        h3 {
+            font-size: 20px;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 20px;
+            max-width: 100%;
+        }
+    }
+
+    &__img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 20px;
+        max-width: 100%;
+    }
+
+    &__mainimg-descr {
+        max-width: 730px;
+        margin: 0 auto 40px;
+        font-style: italic;
+        font-weight: normal;
+        font-size: 18px;
+        color: $gray;
+    }
+
+    &__box {
+        max-width: 230px;
+        padding: 15px;
+        background: $white;
+        box-shadow: 0px 0px 40px -20px rgba(0, 0, 0, 0.15);
+        border-radius: 5px;
+    }
+
+    &__box-img {
+        display: block;
+        margin: 0 auto 5px;
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+    }
+
+    &__box-title {
+        margin: 0 0 3px;
+        font-weight: bold;
+        font-size: 12px;
+        line-height: 18px;
+        text-align: center;
+        color: $dark-gray;
+    }
+
+    &__box-descr {
+        display: block;
+        font-size: 12px;
+        line-height: 18px;
+        text-align: center;
+        color: $gray;
+    }
+
+
+}

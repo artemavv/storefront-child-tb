@@ -1,0 +1,179 @@
+#place_order, body .checkout-button {
+    background: #B35BD2;
+    background-color: #B35BD2 !important;    
+    border: none;
+    border-radius: 5px;
+    color: white;
+    transition: 0.4s all;
+    margin-bottom: 35px;
+    font-weight: 400;
+    width: 100%;
+
+&:hover {
+     background: #9b44b9;
+     background-color: #9b44b9 !important;    
+     color: white !important;
+ }
+}
+
+@media (max-width: 767px) {
+    .cart-collaterals .cart_totals {
+        width: 100% !important;
+    }
+}
+
+.btn {
+    display: inline-block;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: center;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: background-color .3s cubic-bezier(0.37, 0, 0.63, 1), color .3s cubic-bezier(0.37, 0, 0.63, 1);
+
+    &:hover {
+        color: inherit;
+    }
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.btn-primary {
+    padding: 12px;
+    font-size: 16px;
+    line-height: 19px;
+    color: $white;
+    background-color: $violet;
+    border-color: $violet;
+    border-radius: 5px;
+
+    &:hover {
+        color: $white !important;
+        background-color: #943fb2;
+        border-color: $violet;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgba($violet, .5);
+    }
+
+    &:active {
+        background-color: #BC7FDC;
+    }
+}
+
+.btn-outline-primary {
+    padding: 12px;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: $violet;
+    border: 1px solid $violet;
+    border-radius: 5px;
+
+    &:hover {
+        color: $white;
+        background-color: $violet;
+        border-color: $violet;
+    }
+
+    &.semi-transparent:hover {
+        color: $violet;
+        background-color: rgba($violet, .3);
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgba($violet, .5);
+    }
+
+    &:active {
+        background-color: #BC7FDC;
+    }
+}
+
+.btn-outline-secondary {
+    padding: 12px;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 17px;
+    text-align: center;
+    color: $gray;
+    border-color: $gray;
+    border: 1px solid $gray;
+    border-radius: 5px;
+
+    &:hover {
+        color: $white;
+        background-color: $gray;
+        border-color: $gray;
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgba($gray, .5);
+    }
+
+    &:active {
+        background-color: #838383;
+    }
+}
+
+.btn-clear {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 160px;
+    padding: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    color: $dark-gray;
+    background: #F7F7F8;
+    border-radius: 5px;
+
+    svg {
+        width: 8px;
+        height: 8px;
+        fill: $dark-gray;
+        stroke: $dark-gray;
+        margin-left: 10px;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background-color: $light-gray;
+        border-color: $gray;
+    }
+}
+
+a:focus, button:focus, .button.alt:focus, input:focus, textarea:focus, input[type="button"]:focus, input[type="reset"]:focus, input[type="submit"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="url"]:focus, input[type="password"]:focus, input[type="search"]:focus {
+    outline: none;
+}
+
+
+// .btn-inactive {
+//     padding: 12px;
+//     font-size: 16px;
+//     line-height: 19px;
+//     color: $white;
+//     background-color: $violet;
+//     border-color: $violet;
+//     border-radius: 5px;
+
+//     &:hover {
+//         color: $white;
+//         background-color: #CC90EC;
+//         border-color: $violet;
+//     }
+
+//     &:focus {
+//         box-shadow: 0 0 0 2px rgba($violet, .5);
+//     }
+
+//     &:active {
+//         background-color: #BC7FDC;
+//     }
+// }

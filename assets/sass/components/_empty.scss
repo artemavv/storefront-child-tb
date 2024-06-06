@@ -1,0 +1,36 @@
+.empty {
+    padding: 40px 0;
+    text-align: center;
+
+    &__title {
+        margin: 0 0 15px;
+        font-family: $lora;
+        font-size: 28px;
+        line-height: 36px;
+        letter-spacing: 0.02em;
+        color: $dark-gray;
+    }
+
+    &__text {
+        margin: 0 0 30px;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 19px;
+        color: $gray;
+    }
+
+    &__img {
+        margin: 0 auto 30px;
+        width: 180px;
+        height: 180px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #FCFCFD;
+        border-radius: 50%;
+    }
+
+    .btn.btn-primary {
+        padding: 12px 74px;
+    }
+}

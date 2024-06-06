@@ -1,0 +1,58 @@
+.default-tb-select {
+    background-color: transparent;
+    border: 1px solid rgba(119, 119, 119, 0.5);
+    border-radius: 5px;
+    padding: 12px 30px;
+    padding-right: 55px;
+    outline: none;
+    appearance: none;
+
+    &-wrap {
+        position: relative;
+
+        .select-arrow {
+            position: absolute;
+            display: inline-block;
+            position: absolute;
+            z-index: -1;
+            right: 26px;
+            top: calc(50% - 2px);
+            width: 11px;
+            height: 6px;
+        }
+    }
+}
+
+.noUi-target {
+    border: none;
+    box-shadow: none;
+    background: $violet;
+}
+
+.noUi-horizontal {
+    height: 1px;
+    top: 7px;
+}
+
+.noUi-connect {
+    background-color: $violet;
+}
+
+.noUi-horizontal .noUi-handle {
+    width: 15px;
+    height: 15px;
+    top: -7px;
+    right: 0;
+    border: 1px solid $violet;
+    border-radius: 50%;
+    box-shadow: none;
+    cursor: pointer;
+
+    &-upper {
+        right: 0;
+    }
+
+    &::before, &::after {
+        content: none;
+    }
+}

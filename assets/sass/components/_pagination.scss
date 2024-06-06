@@ -1,0 +1,41 @@
+ul.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 6.6%;
+    padding-bottom: 11.7%;
+}
+
+.page-item {
+    padding-left: 16px;
+    padding-right: 16px;
+
+    &.active .page-link {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: $violet;
+        color: $white;
+    }
+}
+
+.page-link {
+    transition: 0.2s;
+}
+
+.page-link svg {
+    width: 25px;
+    height: 25px;
+    transition: 0.2s;
+}
+
+a.page-link:hover {
+    color: $violet;
+
+    svg {
+        fill: $violet;
+    }
+}

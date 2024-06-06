@@ -1,0 +1,122 @@
+.delivery-page {
+
+    .breadcrumbs {
+        padding: 40px 0;
+        margin: 0;
+    }
+}
+
+.delivery-intro {
+    min-height: 397px;
+    background: url('/img/delivery-bg.jpg') center / cover no-repeat;
+}
+
+.delivery {
+    padding-top: 60px;
+
+    &__title {
+        margin-bottom: 40px;
+        font-weight: bold;
+        font-size: 24px;
+        line-height: 29px;
+
+        svg {
+            margin-left: 15px;
+            width: 16px;
+            height: 8px;
+            fill: $violet;
+        }
+
+        &.active {
+            svg {
+                transform: rotate(180deg);
+            }
+        }
+    }
+
+    &__wrapper {
+        display: none;
+        margin-bottom: 40px;
+
+        &.active {
+            display: block;
+        }
+    }
+
+    &__item {
+        padding-bottom: 28px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid $gray;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+
+    &__item-title {
+        position: relative;
+        margin-bottom: 24px;
+        font-weight: 600;
+        font-size: 24px;
+        line-height: 29px;
+        color: $gray;
+
+    }
+
+    &__item-inner {
+        display: flex;
+        // justify-content: space-between;
+    }
+
+    &__item-descr {
+        width: 65%;
+        max-width: 635px;
+        margin-right: 109px;
+
+        p {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 24px;
+        }
+
+        small {
+            font-weight: normal;
+            font-size: 14px;
+            line-height: 20px;
+            color: $gray;
+        }
+    }
+
+    &__item-info {
+        width: 35%;
+        max-width: 345px;
+    }
+
+    &__item-box {
+        margin-bottom: 20px;
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+
+        span + span {
+            margin-top: 5px;
+        }
+
+        span {
+            display: block;
+            font-size: 20px;
+            line-height: 24px;
+
+            &:first-child {
+                font-weight: bold;
+                color: $dark-gray;
+            }
+
+            &:last-child {
+                color: $gray;
+            }
+        }
+    }
+}
