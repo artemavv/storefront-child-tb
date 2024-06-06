@@ -441,28 +441,75 @@ function videoautoplay() {
 }
 
 
+add_action( 'woocommerce_thankyou', 'create_user_account_for_orders', 10, 1 );
 
 
+/**
+ * This is a callback for 'woocommerce_thankyou' action.
+ * 
+ * When a new order is created:
+ * 
+ * 1) create a new user (unless user is already logged in).
+ * 2) assign this order to the freshly created user.
+ * 3) send email to user with his credentials
+ * 
+ * @param int $order_id
+ * @return void
+ */
+function create_user_account_for_orders( $order_id )  {
+  
+  
+  if ( ! $order_id ) return;
+
+  $user = wp_get_current_user();
+  $order = wc_get_order( $order_id );
+  
+  // make sure that current visitor is not logged in, and order has no user attached
+  if (is_object($user) && $user->ID === 0 && $order->get_status() == 'processing' && ! $order->get_customer_id() ) {
+
+    $first_name = $order->get_billing_first_name();
+    $last_name  = $order->get_billing_last_name();
+    $user_email = $order->get_billing_email();
+    
+    $user_login = wc_create_new_customer_username( $user_email );
+    $user_password = wp_generate_password( 12, false );
+      
+    $user_data = array(
+      'user_login'  => $user_login,
+      'user_email'  => $user_email,
+      'first_name'  => $first_name,
+      'last_name'   => $last_name,
+      'display_name'  => $first_name . ' ' . $last_name,
+      'user_pass'   => $user_password,
+      'role' => 'customer'
+    );
+
+    $user_id = wp_insert_user( $user_data );
+    
+    if ( is_int( $user_id ) && $user_id > 0 ) {
+      $order->set_customer_id( $user_id );
+      $order->save();
+      
+      new WC_Emails();
+      
+      if ( class_exists( 'TB_Email_New_Account_For_Order' ) ) {
+        $mailer = new TB_Email_New_Account_For_Order();
+        $mailer->trigger( $user_id, $user_password );
+      }
+      
+    }
+  }
+  
+}
 
 
+function add_custom_mailer_classes( $emails ) {
+  // Include the email class file if it's not included already
+  if ( ! isset( $emails[ 'TB_Email_New_Account_For_Order' ] ) ) {
+      $emails[ 'TB_Email_New_Account_For_Order' ] = include_once( 'emails/class-new-account-for-order.php' );
+  }
 
+  return $emails;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+add_filter( 'woocommerce_email_classes', 'add_custom_mailer_classes' );
