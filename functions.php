@@ -441,7 +441,7 @@ function videoautoplay() {
 }
 
 
-add_action( 'woocommerce_thankyou', 'create_user_account_for_orders', 10, 1 );
+add_action( 'woocommerce_thankyou', 'tb_create_user_account_for_orders', 10, 1 );
 
 
 /**
@@ -456,7 +456,7 @@ add_action( 'woocommerce_thankyou', 'create_user_account_for_orders', 10, 1 );
  * @param int $order_id
  * @return void
  */
-function create_user_account_for_orders( $order_id )  {
+function tb_create_user_account_for_orders( $order_id )  {
   
   
   if ( ! $order_id ) return;
@@ -502,14 +502,68 @@ function create_user_account_for_orders( $order_id )  {
   
 }
 
-
-function add_custom_mailer_classes( $emails ) {
-  // Include the email class file if it's not included already
+/**
+ * Filter for 'woocommerce_email_classes'
+ * 
+ * Adds our custom email classes for WooCommerce
+ * 
+ * @param array $emails
+ * @return array
+ */
+function tb_add_custom_mailer_classes( $emails ) {
+  
+  // Send email to a customer when a new order is created
   if ( ! isset( $emails[ 'TB_Email_New_Account_For_Order' ] ) ) {
       $emails[ 'TB_Email_New_Account_For_Order' ] = include_once( 'emails/class-new-account-for-order.php' );
+  }
+  
+  // Send email to a customer when their order is shipped
+  if ( ! isset( $emails[ 'TB_Email_Customer_Sent_Order' ] ) ) {
+      $emails[ 'TB_Email_Customer_Sent_Order' ] = include_once( 'emails/class-customer-sent-order.php' );
   }
 
   return $emails;
 }
 
-add_filter( 'woocommerce_email_classes', 'add_custom_mailer_classes' );
+add_filter( 'woocommerce_email_classes', 'tb_add_custom_mailer_classes' );
+
+/**
+ * Additional shortcodes for "Email Template Customizer" 
+ * 
+ * this function is needed for our custom emails that are sent to customers ( see tb_add_custom_mailer_classes() )
+ * 
+ * @see plugins/email-template-customizer-for-woo/includes/utils.php for the filter signature
+ */
+add_filter( 'viwec_register_replace_shortcode', 'tb_additional_shortcodes_for_email_customizer', 10, 3 );
+
+function tb_additional_shortcodes_for_email_customizer( $shortcodes, $object, $args ) {
+  
+  if ( $object && is_a( $object, 'WC_Order' ) ) {
+    $tracking_number = get_post_meta( $object->get_id(), 'tracking_number_for_armenian_post', true );
+
+    // note that each custom shortcode must be a separate array
+    $shortcodes[] = array( '{tracking_number}' => $tracking_number );
+    
+    $user_id = $object->get_customer_id();
+    $set_password_url = tb_generate_set_password_url( $user_id );
+    
+    $shortcodes[] = array( '{set_password_url}' => $set_password_url );
+  }
+  
+  
+  return $shortcodes;
+}
+
+function tb_generate_set_password_url( $user_id ) {
+
+  $user = get_user_by( 'id', $user_id );
+  
+  $key = get_password_reset_key( $user );
+  if ( ! is_wp_error( $key ) ) {
+    $action                 = 'newaccount';
+    return wc_get_account_endpoint_url( 'lost-password' ) . "?action=$action&key=$key&login=" . rawurlencode( $this->object->user_login );
+  } else {
+    // Something went wrong while getting the key for new password URL, send customer to the generic password reset.
+    return wc_get_account_endpoint_url( 'lost-password' );
+  }
+}

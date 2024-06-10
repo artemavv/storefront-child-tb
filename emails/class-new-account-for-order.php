@@ -187,7 +187,6 @@ if ( ! class_exists( 'TB_Email_New_Account_For_Order', false ) ) :
 		 * 
 		 * See also Automattic\WooCommerce\Blocks\Domain\Services\Email\CustomerNewAccount and wp_new_user_notification.
 		 * 
-		 * @since 6.0.0
 		 * @return string
 		 */
 		protected function generate_set_password_url() {
