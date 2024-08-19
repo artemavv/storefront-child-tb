@@ -453,55 +453,129 @@ add_action( 'woocommerce_thankyou', 'tb_create_user_account_for_orders', 10, 1 )
  * 2) assign this order to the freshly created user.
  * 3) send email to user with his credentials
  * 
+ * 4) create autologin links for the product reviews
+ * 
  * @param int $order_id
  * @return void
  */
 function tb_create_user_account_for_orders( $order_id )  {
   
   
-  if ( ! $order_id ) return;
-
-  $user = wp_get_current_user();
-  $order = wc_get_order( $order_id );
+	if ( ! $order_id ) return;
   
-  // make sure that current visitor is not logged in, and order has no user attached
-  if (is_object($user) && $user->ID === 0 && $order->get_status() == 'processing' && ! $order->get_customer_id() ) {
-
-    $first_name = $order->get_billing_first_name();
-    $last_name  = $order->get_billing_last_name();
-    $user_email = $order->get_billing_email();
-    
-    $user_login = wc_create_new_customer_username( $user_email );
-    $user_password = wp_generate_password( 12, false );
-      
-    $user_data = array(
-      'user_login'  => $user_login,
-      'user_email'  => $user_email,
-      'first_name'  => $first_name,
-      'last_name'   => $last_name,
-      'display_name'  => $first_name . ' ' . $last_name,
-      'user_pass'   => $user_password,
-      'role' => 'customer'
-    );
-
-    $user_id = wp_insert_user( $user_data );
-    
-    if ( is_int( $user_id ) && $user_id > 0 ) {
-      $order->set_customer_id( $user_id );
-      $order->save();
-      
-      new WC_Emails();
-      
-      if ( class_exists( 'TB_Email_New_Account_For_Order' ) ) {
-        $mailer = new TB_Email_New_Account_For_Order();
-        $mailer->trigger( $user_id, $user_password );
-      }
-      
-    }
-  }
+	$user = wp_get_current_user();
+	$order = wc_get_order( $order_id );
+	
+	// make sure that current visitor is not logged in, and order has no user attached
+	if ( ( is_null($user) || ( is_object($user) && $user->ID === 0 ) ) && $order->get_status() == 'processing' && ! $order->get_customer_id()) {
   
+	  $first_name = $order->get_billing_first_name();
+	  $last_name  = $order->get_billing_last_name();
+	  $user_email = $order->get_billing_email();
+	  
+	  $user_login = wc_create_new_customer_username( $user_email );
+	  $user_password = wp_generate_password( 12, false );
+		
+	  $user_data = array(
+		'user_login'  => $user_login,
+		'user_email'  => $user_email,
+		'first_name'  => $first_name,
+		'last_name'   => $last_name,
+		'display_name'  => $first_name . ' ' . $last_name,
+		'user_pass'   => $user_password,
+		'role' => 'customer'
+	  );
+  
+	  $user_id = wp_insert_user( $user_data );
+	  
+	  if ( is_int( $user_id ) && $user_id > 0 ) {
+		$order->set_customer_id( $user_id );
+		$order->save();
+		
+		
+		tb_create_user_autologin_links_for_product_review( $order, $user_id );
+		
+		new WC_Emails();
+		
+		if ( class_exists( 'TB_Email_New_Account_For_Order' ) ) {
+		  $mailer = new TB_Email_New_Account_For_Order();
+		  $mailer->trigger( $user_id, $user_password );
+		}
+		
+	  }
+	}
+	elseif ( is_object($user) && $user->ID != 0 ) {
+	  tb_create_user_autologin_links_for_product_review( $order, $user->ID );
+	}
+	
 }
 
+/**
+ * 
+ * We want user to be able to open a link sent to them in a email, and become automatically logged in
+ * so they can leave a product review immediately.
+ * 
+ * To do so, when a new order is created, we 
+ * 
+ * 1) create autologin link for each order product
+ * 2) save this link into order item meta
+ * 3) place "Order Details" block into email template, and it will render order products and their metadata 
+ * 
+ * Email with "Order Details" is sent to the customer when the order is delivered.
+ * 
+ * @param WC_Order $order
+ * @param int $user_id
+ * @return void
+ */
+function tb_create_user_autologin_links_for_product_review( $order, $user_id ) {
+  
+  
+	$order_meta = $order->get_meta_data();
+	
+	$added_autologin_links = false;
+	
+	foreach ( $order_meta as $meta ) {
+	  if ( $meta->key == '_added_autologin_links' ) {
+		$added_autologin_links = true;
+		break;
+	  }
+	}
+	
+	if ( ! $added_autologin_links ) {
+	  $items = $order->get_items();
+  
+	  foreach ( $items as $item_id => $item ) {
+  
+		if ( function_exists( 'pkg_autologin_generate_for_order_product' ) ) {
+			$autologin_code = pkg_autologin_generate_for_order_product( $user_id ); 
+		}
+		else {
+			$autologin_code = '';
+		}
+		
+		
+		$product = $item->get_product();
+		$product_page_url = $product->get_permalink();
+		
+		if ( parse_url($product_page_url, PHP_URL_QUERY) ) { // check if url has "?param=query"
+
+			$autologin_link = $product_page_url . '&autologin_code=' . $autologin_code;
+		}
+		else {
+			$autologin_link = $product_page_url . '?autologin_code=' . $autologin_code;
+		}
+		
+		wc_update_order_item_meta( $item_id, '_autologin_link', $autologin_link);
+		wc_update_order_item_meta( $item_id, 'Leave Review', '<a href="' . $autologin_link . '">Write a review</a>');
+	  }
+  
+	  $order->update_meta_data( '_added_autologin_links', 1 );
+	  $order->save();
+	}
+	
+}
+
+  
 /**
  * Filter for 'woocommerce_email_classes'
  * 
@@ -554,16 +628,52 @@ function tb_additional_shortcodes_for_email_customizer( $shortcodes, $object, $a
   return $shortcodes;
 }
 
+
 function tb_generate_set_password_url( $user_id ) {
 
-  $user = get_user_by( 'id', $user_id );
-  
-  $key = get_password_reset_key( $user );
-  if ( ! is_wp_error( $key ) ) {
-    $action                 = 'newaccount';
-    return wc_get_account_endpoint_url( 'lost-password' ) . "?action=$action&key=$key&login=" . rawurlencode( $this->object->user_login );
-  } else {
-    // Something went wrong while getting the key for new password URL, send customer to the generic password reset.
-    return wc_get_account_endpoint_url( 'lost-password' );
+	$user = get_user_by( 'id', $user_id );
+	
+	if ( $user && is_a( $user, 'WC_User' ) ) {
+	  $key = get_password_reset_key( $user );
+	  if ( ! is_wp_error( $key ) ) {
+		$action                 = 'newaccount';
+		return wc_get_account_endpoint_url( 'lost-password' ) . "?action=$action&key=$key&login=" . rawurlencode( $user->user_login );
+	  } else {
+		// Something went wrong while getting the key for new password URL, send customer to the generic password reset.
+		return wc_get_account_endpoint_url( 'lost-password' );
+	  }
+	}
+	
+	return '';
   }
-}
+
+
+  if ( ! function_exists( 'pkg_autologin_generate_for_order_product' ) ) {
+	function pkg_autologin_generate_for_order_product( $user_id ) {
+  
+	  $new_code = pkg_autologin_generate_code();
+	  update_user_meta($user_id, PKG_AUTOLOGIN_USER_META_KEY, $new_code);
+	  return $new_code;
+	}
+  }
+  
+  
+  if ( isset( $_GET['test_autologin']) ) {
+  
+	$user_id = intval($_GET['test_autologin']);
+  
+	if ( $user_id > 0 ) {
+	  if ( function_exists( 'pkg_autologin_generate_for_order_product' ) && function_exists('pkg_autologin_generate_code') ) {
+		$autologin_code = pkg_autologin_generate_for_order_product( $user_id ); 
+  
+		echo(" FOR $user_id autologin_code = $autologin_code " );
+	  }
+	  else {
+		echo( 'NO FUN');
+	  }
+  
+	  die();
+	} 
+  }
+  
+  

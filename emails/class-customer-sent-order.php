@@ -76,7 +76,7 @@ if ( ! class_exists( 'TB_Email_Customer_Sent_Order', false ) ) :
 
       $this->tracking_number = false;
       
-      if ( $new_status == 'sent' ) {
+      if ( $new_status == 'sent' || $new_status == 'wc-sent'  ) {
         
         if ( is_a( $order, 'WC_Order' ) ) {
           $this->object                         = $order;
@@ -92,6 +92,9 @@ if ( ! class_exists( 'TB_Email_Customer_Sent_Order', false ) ) :
         if ( $this->is_enabled() && $this->get_recipient() && $this->tracking_number ) {
           $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
         }
+      }
+      else {
+        self::log( [  'TB_Email_Customer_Sent_Order', $order_id, $old_status, $new_status ]);
       }
 
 			$this->restore_locale();
@@ -159,6 +162,16 @@ if ( ! class_exists( 'TB_Email_Customer_Sent_Order', false ) ) :
       $tracking_number = get_post_meta( $this->object->get_id(), 'tracking_number_for_armenian_post', true );
       return $tracking_number;
 		} 
+        
+        
+        
+    public static function log($data) {
+
+      $filename = pathinfo( __FILE__, PATHINFO_DIRNAME ) . DIRECTORY_SEPARATOR .'log.txt';
+      
+      file_put_contents($filename, date("Y-m-d H:i:s") . " | " . print_r($data,1) . "\r\n\r\n", FILE_APPEND);
+      
+    }
 	}
 
 endif;
