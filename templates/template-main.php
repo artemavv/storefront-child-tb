@@ -44,7 +44,7 @@ get_header(); ?>
                            
                           <a href="<?php echo get_permalink(get_field('main_product')); ?>">
                               <div class="intro-slider__item">
-                                  <img class="intro-slider__item-img" src="<?php the_field('main_product_img'); ?>" alt="">
+                                  <img class="intro-slider__item-img" src="https://tannybunny.com/wp-content/uploads/2024/04/Kitsune.webp<?php /* the_field('main_product_img'); */ ?>" alt="">
                                   <div class="intro-slider__item-content">
                                       <h3 class="intro-slider__item-title">
                                           <?php echo get_the_title( get_field('main_product') ); ?>
@@ -56,8 +56,8 @@ get_header(); ?>
                                       <div class="intro-slider__item-price">
                                           <?php echo get_post_meta( get_field('main_product'), '_price', true); ?> $
                                           <?php
-                                          /* $price = number_format((float)$product->get_variation_price( 'min', true ), 2, '.', '');
-                                           echo $price.''.get_woocommerce_currency_symbol();  */
+                                          // $price = number_format((float)$product->get_variation_price( 'min', true ), 2, '.', '');
+                                          // echo $price.''.get_woocommerce_currency_symbol();  
                                           ?>
                                       </div>
                                   </div>
@@ -65,8 +65,8 @@ get_header(); ?>
                           </a>
                           
                           <?php endif; ?>
-                          
                         </div>
+                    </div>
                     </div>
                 </div>
 
