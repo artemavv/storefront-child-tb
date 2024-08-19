@@ -2471,3 +2471,18 @@ button.menu-toggle::after {
 	}
 }
 
+
+.checkout-info-block {
+  float:right;
+  clear: right;
+  padding-top: 30px;
+  margin: 0px;
+  width:41%;
+}
+
+@media (max-width: 768px) {
+  
+  .checkout-info-block {
+    width:100%;
+  }
+}
