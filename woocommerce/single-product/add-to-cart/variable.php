@@ -25,6 +25,10 @@ $variations_attr = function_exists('wc_esc_json') ? wc_esc_json($variations_json
 
 $customVariations = get_field('constructor', $product->id);
 
+if ( ! $customVariations ) {
+	$customVariations = array();
+}
+
 do_action('woocommerce_before_add_to_cart_form'); ?>
 
     <form class="variations_form cart"
@@ -81,7 +85,7 @@ do_action('woocommerce_before_add_to_cart_form'); ?>
             </table>
             <?php do_action('woocommerce_after_variations_table'); ?>
 
-            <?php if (count($customVariations > 0)) : ?>
+            <?php if (count($customVariations) > 0) : ?>
 
                 <?php foreach ($customVariations as $customVariation) : ?>
                     <label class="product__select-label"><?php echo $customVariation['name_of_variation']; ?>:

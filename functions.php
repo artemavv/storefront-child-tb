@@ -33,6 +33,7 @@ require 'inc/storefront-functions.php';
 require 'inc/storefront-template-hooks.php';
 require 'inc/storefront-template-functions.php';
 require 'inc/wordpress-shims.php';
+require 'inc/custom-shipping.php';
 
 if (class_exists('Jetpack')) {
 	$storefront->jetpack = require 'inc/jetpack/class-storefront-jetpack.php';

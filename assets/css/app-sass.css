@@ -6166,7 +6166,7 @@ html {
 }
 .product-info__list {
   max-width: 320px;
-  margin-bottom: 45px;
+  margin-bottom: 12px;
 }
 .product-info__list-item {
   position: relative;
@@ -11167,4 +11167,41 @@ p {
   .choices__list--dropdown .choices__item--selectable {
     padding-right: 0px;
   }
+}
+
+ul.shipping-details {
+ margin-bottom: 12px;
+}
+
+ul.shipping-details li {
+  font-size: 14px;
+  line-height: 17px;
+  background: #ffffff;
+  margin-bottom: 12px;
+}
+
+ul.shipping-details li svg.check-mark {
+  height: 16px;
+  fill: #3b67d9;
+  margin-right: 5px;
+}
+
+span.tooltip-notice {
+  text-decoration: underline dashed;
+  cursor: help;
+  text-underline-position: under;
+}
+
+ul.shipping-and-return {
+ margin-bottom: 12px;
+ margin-left: 12px;
+}
+
+ul.shipping-and-return li {
+  margin-bottom: 12px;
+}
+
+ul.shipping-and-return li svg {
+  height: 24px;
+  margin-right: 5px;
 }
