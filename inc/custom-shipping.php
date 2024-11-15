@@ -32,9 +32,23 @@ class TannyBunny_Custom_Shipping_Core {
 	 * @var array
 	 */
 	public static $default_option_values = [
-		'default_delivery_min' => 7,
-		'default_delivery_max' => 14,
-		'default_processing_time' => 3
+		'us_delivery_min'            => 7,
+		'us_delivery_max'            => 14,
+		'us_delivery_min_express'    => 7,
+		'us_delivery_max_express'    => 14,
+		'us_processing_time'         => 3,
+		
+		'us_shipping_cost'           => 0,
+		'us_shipping_cost_express'   => 12,
+		
+		'am_delivery_min'            => 7,
+		'am_delivery_max'            => 14,
+		'am_delivery_min_express'    => 7,
+		'am_delivery_max_express'    => 14,
+		'am_processing_time'         => 3,
+		
+		'am_shipping_cost'           => 0,
+		'am_shipping_cost_express'   => 12,
 	];
 
 	public static $option_values = array();
@@ -495,59 +509,175 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 		$estimates_am = get_option( self::OPTION_DELIVERY_ESTIMATES . '_am' );
 		
 		
-		$delivery_settings_field_set = array(
+		$USA_delivery_settings_field_set = array(
 			array(
-				'name' => "default_delivery_min",
+				'name' => "us_delivery_min",
 				'type' => 'number',
-				'label' => 'Estimated minimum delivery time, in days',
+				'label' => 'MIN delivery time, in days (Free)',
 				'min' => 0,
 				'max' => 100,
 				'step' => 1,
-				'value' => self::$option_values['default_delivery_min'],
+				'value' => self::$option_values['us_delivery_min'],
 			),
 			array(
-				'name' => "default_delivery_max",
+				'name' => "us_delivery_max",
 				'type' => 'number',
-				'label' => 'Estimated maximum delivery time, in days',
+				'label' => 'MAX delivery time, in days (Free)',
 				'min' => 0,
 				'max' => 100,
 				'step' => 1,
-				'value' => self::$option_values['default_delivery_max'],
+				'value' => self::$option_values['us_delivery_max'],
 			),
 			array(
-				'name' => "default_processing_time",
+				'name' => "us_delivery_min_express",
+				'type' => 'number',
+				'label' => 'MIN delivery time, in days (Express)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['us_delivery_min_express'],
+			),
+			array(
+				'name' => "us_delivery_max_express",
+				'type' => 'number',
+				'label' => 'MAX delivery time, in days (Express)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['us_delivery_max_express'],
+			),
+			array(
+				'name' => "us_processing_time",
 				'type' => 'number',
 				'label' => 'Estimated processing time, in days',
 				'min' => 0,
 				'max' => 100,
 				'step' => 1,
-				'value' => self::$option_values['default_processing_time'],
+				'value' => self::$option_values['us_processing_time'],
+			),
+			array(
+				'name' => "us_shipping_cost",
+				'type' => 'number',
+				'label' => 'Default cost of shipping',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['us_shipping_cost'],
+			),
+			array(
+				'name' => "us_shipping_cost_express",
+				'type' => 'number',
+				'label' => 'Default cost of express shipping',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['us_shipping_cost_express'],
 			),
 		);
+		
+		$Armenia_delivery_settings_field_set = array(
+			array(
+				'name' => "am_delivery_min",
+				'type' => 'number',
+				'label' => 'MIN delivery time, in days (Free)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_delivery_min'],
+			),
+			array(
+				'name' => "am_delivery_max",
+				'type' => 'number',
+				'label' => 'MAX delivery time, in days (Free)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_delivery_max'],
+			),
+			array(
+				'name' => "am_delivery_min_express",
+				'type' => 'number',
+				'label' => 'MIN delivery time, in days (Express)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_delivery_min_express'],
+			),
+			array(
+				'name' => "am_delivery_max_express",
+				'type' => 'number',
+				'label' => 'MAX delivery time, in days (Express)',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_delivery_max_express'],
+			),
+			array(
+				'name' => "am_processing_time",
+				'type' => 'number',
+				'label' => 'Estimated processing time, in days',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_processing_time'],
+			),
+			array(
+				'name' => "am_shipping_cost",
+				'type' => 'number',
+				'label' => 'Default cost of shipping',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_shipping_cost'],
+			),
+			array(
+				'name' => "am_shipping_cost_express",
+				'type' => 'number',
+				'label' => 'Default cost of express shipping',
+				'min' => 0,
+				'max' => 100,
+				'step' => 1,
+				'value' => self::$option_values['am_shipping_cost_express'],
+			),
+		);
+		
 		?>
 		<form method="POST" >
 
-				<table class="tbd-global-table">
+				<h2>Delivery times and costs</h2>
+				<table style="width:100%" class="tbd-global-table">
 					<thead>
-						<th>From warehouse in USA</th>
-						<th>From warehouse in Armenia</th>
+						<th><h2>From warehouse in USA</h2>(times and costs for specific countries)</th>
+						<th><h2>From warehouse in Armenia</h2>(times and costs for specific countries)</th>
 					</thead>
 					<tbody>
 						<tr>
-							<td><textarea id="tbd-delivery-estimates-us" rows="30" cols="15" name="estimates_us"><?php echo $estimates_us; ?></textarea></td>
-							<td><textarea id="tbd-delivery-estimates-am" rows="30" cols="15" name="estimates_am"><?php echo $estimates_am; ?></textarea></td>
+							<td><textarea id="tbd-delivery-estimates-us" rows="15" cols="35" name="estimates_us"><?php echo $estimates_us; ?></textarea></td>
+							<td><textarea id="tbd-delivery-estimates-am" rows="15" cols="35" name="estimates_am"><?php echo $estimates_am; ?></textarea></td>
+						</tr>
+						<tr>
+							<td>
+								<h2><?php esc_html_e( 'Times and costs for the rest of the world' ); ?></h2>
+
+								<table class="tbd-global-table">
+										<tbody>
+												<?php self::display_field_set( $USA_delivery_settings_field_set ); ?>
+										</tbody>
+								</table>
+							</td>
+							<td>
+								<h2><?php esc_html_e( 'Times and costs for the rest of the world ' ); ?></h2>
+
+								<table class="tbd-global-table">
+										<tbody>
+												<?php self::display_field_set( $Armenia_delivery_settings_field_set ); ?>
+										</tbody>
+								</table>
+							</td>
 						</tr>
 					</tbody>
 				</table>
 
-				<h2><?php esc_html_e( 'Rest of the world' ); ?></h2>
-
-				<table class="tbd-global-table">
-						<tbody>
-								<?php self::display_field_set( $delivery_settings_field_set ); ?>
-						</tbody>
-				</table>
-				
 				<p class="submit">  
 						<input type="submit" id="tbd-button-save" name="tbd-button-save" class="button button-primary" style="" value="<?php echo self::ACTION_SAVE_OPTIONS; ?>" />
 				</p>
@@ -593,10 +723,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		$this->available_warehouse_names = $product->get_attribute( 'warehouse' );
 		$this->available_warehouses = self::find_warehouses_by_names( $warehouse_names );
-		//echo('<pre>' . print_r( $this->available_warehouses, 1 ) . '</pre>' );
 		$this->product_has_warehouses = is_array( $this->available_warehouses ) && ( count( $this->available_warehouses ) > 0 );
-		
-
 	}
 	
 	
@@ -645,7 +772,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return 'US';
 	}
 	
-	public function get_delivery_estimate() {
+	public function get_delivery_estimate( $mode = 'standard') {
 		
 		$delivery_country = self::get_customer_country();
 		
@@ -658,7 +785,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			
 			// iterate through warehouses to find the fastest delivery time
 			foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
-				$estimate_in_days = $this->get_delivery_estimate_for_warehouse( $warehouse_id, $delivery_country );
+				$estimate_in_days = $this->get_delivery_estimate_for_warehouse( $warehouse_id, $delivery_country, $mode );
 
 				if ( $estimate_in_days['from'] < $min_delivery_time ) {
 					$min_delivery_time = $estimate_in_days['from'];
@@ -667,16 +794,32 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		else { // use default estimates since the product does not have warehouses listed
-			$min_delivery_time = self::$option_values['default_delivery_min'];
-			$max_delivery_time = self::$option_values['default_delivery_max'];
+			
+			if ( $mode == 'standard' ) {
+				$min_delivery_time = self::$option_values['am_delivery_min'];
+				$max_delivery_time = self::$option_values['am_delivery_max'];
+			}
+			else {
+				$min_delivery_time = self::$option_values['am_delivery_min_express'];
+				$max_delivery_time = self::$option_values['am_delivery_max_express'];
+			}
 		}
 		
-		//echo('<pre>' . print_r( [ self::$option_values, $this->available_warehouses, $min_delivery_time, $max_delivery_time] , 1 ) . '</pre>' );
 		return array( 'from' => $min_delivery_time, 'to' => $max_delivery_time );
 	}
 	
-	public function get_delivery_date_estimate() {
-		$estimate_in_days = $this->get_delivery_estimate();
+	// TODO
+	public function get_express_availability() {
+		return true;
+	}
+	
+	// TODO
+	public function get_delivery_cost( $mode = 'standart' ) {
+		return 34;
+	}
+	
+	public function get_delivery_date_estimate( $mode = 'standard' ) {
+		$estimate_in_days = $this->get_delivery_estimate( $mode );
 		
 		$from_timestamp = time() + $estimate_in_days['from'] * DAY_IN_SECONDS;
 		$to_timestamp   = time() + $estimate_in_days['to'] * DAY_IN_SECONDS;
@@ -700,13 +843,13 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	
 	/**
 	 * 
-	 * @param string $warehouse - "Armenia" or "USA"
+	 * @param string $warehouse_id - "am" or "us"
 	 * @param string $country Two-letter country code, e.g. JP, GE, US, RU
 	 * @return array
 	 */
-	public function get_delivery_estimate_for_warehouse( string $warehouse, string $country ) {
+	public function get_delivery_estimate_for_warehouse( string $warehouse_id, string $country, string $mode = 'standard' ) {
 		
-		$option_name = self::OPTION_DELIVERY_ESTIMATES . '_' . $warehouse;
+		$option_name = self::OPTION_DELIVERY_ESTIMATES . '_' . $warehouse_id;
 		
 		$warehouse_data = get_option( $option_name , '' );
 		
@@ -714,18 +857,31 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		//echo( '>>>' . $warehouse . '<pre>' . print_r( $estimates , 1 ) . '</pre>---' . $country );
 		
-		$from = self::$option_values['default_delivery_min'];
-	  $to   = self::$option_values['default_delivery_max'];
+		if ( $mode == 'standard' ) {
+			$from = self::$option_values[ $warehouse_id . '_delivery_min'];
+			$to   = self::$option_values[ $warehouse_id . '_delivery_max'];
+		}
+		else {
+			$from = self::$option_values[ $warehouse_id . '_delivery_min_express'];
+			$to   = self::$option_values[ $warehouse_id . '_delivery_max_express'];
+		}
 			
 		foreach ( $estimates as $country_estimate ) {
 			
 			$country_estimate = str_getcsv( $country_estimate, ',' );
 			
-			if ( is_array($country_estimate) && count( $country_estimate ) >= 3 ) {
+			if ( is_array($country_estimate) && count( $country_estimate ) >= 5 ) {
 				
 				if ( strtolower($country_estimate[0]) == strtolower($country) )  {
-					$from = 		$country_estimate[1];
-					$to   = 		$country_estimate[2];
+					if ( $mode == 'standard' ) {
+						$from = 		$country_estimate[1];
+						$to   = 		$country_estimate[2];
+					}
+					else {
+						$from = 		$country_estimate[3];
+						$to   = 		$country_estimate[4];
+					}
+					break;
 				}
 			}
 		}
@@ -764,21 +920,42 @@ function display_shipping_conditions_block() {
 	$shipping = new TannyBunny_Custom_Shipping_Helper( $product );
 	
 	$shipping_locations = $shipping->available_warehouse_names ?: 'Armenia';
-	$earliest_date      = $shipping->get_delivery_date_estimate();
+	
+	$is_express_shipping_available = $shipping->get_express_availability();
+	
+	$express_date       = $shipping->get_delivery_date_estimate( 'express' );
+	$standard_date      = $shipping->get_delivery_date_estimate( 'standard' );
+	$express_cost       = wc_price( $shipping->get_delivery_cost( 'express') );
+	
 	
 	$calendar_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.5 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 5H3v16h18V5h-3.5V3h-2v2h-7V3h-2zm0 2v1h2V7h7v1h2V7H19v3H5V7zM5 12v7h14v-7z"></path></svg>';
 	$box_icon        = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.5 15h-6c-.3 0-.5.2-.5.5s.2.5.5.5h6c.3 0 .5-.2.5-.5s-.2-.5-.5-.5m-6-1h4c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-4c-.3 0-.5.2-.5.5s.2.5.5.5m5 3h-5c-.3 0-.5.2-.5.5s.2.5.5.5h5c.3 0 .5-.2.5-.5s-.2-.5-.5-.5"></path><path d="m21.9 6.6-2-4Q19.6 2 19 2H5q-.6 0-.9.6l-2 4c-.1.1-.1.2-.1.4v14c0 .6.4 1 1 1h18c.6 0 1-.4 1-1V7c0-.2 0-.3-.1-.4M5.6 4h12.8l1 2H4.6zM4 20V8h16v12z"></path></svg>';
-	$shipping_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M20 12.266 16.42 6H6v1h5v2H2V7h2V4h13.58L22 11.734V18h-2.17a3.001 3.001 0 0 1-5.66 0h-2.34a3.001 3.001 0 0 1-5.66 0H4v-3H2v-2h4v3h.17a3.001 3.001 0 0 1 5.66 0h2.34a3.001 3.001 0 0 1 5.66 0H20zM18 17a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path><path d="M17.5 11 15 7h-2v4zM9 12H2v-2h7z"></path></svg>';
+	$express_shipping_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill-rule="evenodd" clip-rule="evenodd" d="M20 12.266 16.42 6H6v1h5v2H2V7h2V4h13.58L22 11.734V18h-2.17a3.001 3.001 0 0 1-5.66 0h-2.34a3.001 3.001 0 0 1-5.66 0H4v-3H2v-2h4v3h.17a3.001 3.001 0 0 1 5.66 0h2.34a3.001 3.001 0 0 1 5.66 0H20zM18 17a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-8 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0"></path><path d="M17.5 11 15 7h-2v4zM9 12H2v-2h7z"></path></svg>';
+	$free_shipping_icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M16.5 6H3V17.25H3.375H4.5H4.52658C4.70854 18.5221 5.80257 19.5 7.125 19.5C8.44743 19.5 9.54146 18.5221 9.72342 17.25H15.0266C15.2085 18.5221 16.3026 19.5 17.625 19.5C18.9474 19.5 20.0415 18.5221 20.2234 17.25H21.75V12.4393L18.3107 9H16.5V6ZM16.5 10.5V14.5026C16.841 14.3406 17.2224 14.25 17.625 14.25C18.6721 14.25 19.5761 14.8631 19.9974 15.75H20.25V13.0607L17.6893 10.5H16.5ZM15 15.75V9V7.5H4.5V15.75H4.75261C5.17391 14.8631 6.07785 14.25 7.125 14.25C8.17215 14.25 9.07609 14.8631 9.49739 15.75H15ZM17.625 18C17.0037 18 16.5 17.4963 16.5 16.875C16.5 16.2537 17.0037 15.75 17.625 15.75C18.2463 15.75 18.75 16.2537 18.75 16.875C18.75 17.4963 18.2463 18 17.625 18ZM8.25 16.875C8.25 17.4963 7.74632 18 7.125 18C6.50368 18 6 17.4963 6 16.875C6 16.2537 6.50368 15.75 7.125 15.75C7.74632 15.75 8.25 16.2537 8.25 16.875Z" fill="#080341"/>
+</svg>';
+	
 	$location_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M17.083 12.189 12 21l-5.083-8.811a6 6 0 1 1 10.167 0m-1.713-1.032.02-.033a4 4 0 1 0-6.78 0l.02.033 3.37 5.84z"></path></svg>';
 	?>
 	
 	<h4>Shipping and return policies</h4>
 		
 	<ul class="shipping-and-return">
-		<li><?php echo $calendar_icon; ?>  Arrives soon! Get it by <span class="tooltip-notice" ><?php echo $earliest_date; ?>!</span></li>
+		<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" ><?php echo $standard_date; ?></span></li>
+		<?php if ( $is_express_shipping_available ): ?>
+			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost; ?> (<span class="tooltip-notice" ><?php echo $express_date; ?>)</span></li>
+		<?php endif; ?>
+			
 		<li><?php echo $box_icon; ?> <span class="tooltip-notice" >Returns & exchanges accepted</span> within 14 days</li>
-		<li><?php echo $shipping_icon; ?>  Free shipping</li>
 		<li><?php echo $location_icon; ?>  Ships from <strong><?php echo $shipping_locations; ?></strong></li>
 	</ul>
 	<?php
+}
+
+add_action( 'woocommerce_shipping_init', 'initialize_tannybunny_fedex_shipping_method' );
+
+function initialize_tannybunny_fedex_shipping_method( ) {
+	if ( class_exists( 'WC_Shipping_Method' ) ) {
+		include 'tannybunny-custom-shipping-methods.php';
+	} 
 }
