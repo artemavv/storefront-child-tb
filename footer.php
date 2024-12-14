@@ -281,52 +281,10 @@
     jQuery(document).ready(function(){
         console.log("hello");
         jQuery(".woocommerce-billing-fields").find("h3").html("Shipping Details");
-        /* Add play icon on Image with video */
-        jQuery("img").each(function(){
-            var iurl = jQuery(this).attr("src");
-            console.log(jQuery("div[data-thumb='"+iurl+"']").find("a").attr("data-type"));
-            if(jQuery("div[data-thumb='"+iurl+"']").find("a").attr("data-type")=='video'){
-             /*   alert("this is video");
-              jQuery("img[src='"+iurl+"']").before('<svg class="icon"><use xlink:href="https://tannybunny.com/wp-content/themes/storefront-child/assets/svg/play-button.svg"></use></svg>');*/
-            }
-        });
-        /* Video autoplay */
-        jQuery("img").on("click,touchstart",function(){
-            console.log("image clicked");
-           /*setTimeout(isimageactive(this), 2000);*/
-            var imgurl = jQuery(this).attr("src");
-            jQuery.ajax({
-             type : "post",
-             /*dataType : "json",*/
-             url : "<?php echo admin_url( 'admin-ajax.php' ); ?>",
-             data : {action: "videoautoplay", "imgurl" : imgurl},
-             success: function(response) {
-                console.log(response);
-                setTimeout(function() {
-                    /*alert("hello");*/
-                     jQuery("a[data-type=video]").find("iframe").attr('src',response);
-                 }, 2000)
-             }
-          }); 
-        });
-
+        
     });
 </script>
 <script>
- /*jQuery(document).ready(function(){
-    console.log("hiii");
-    var owl = jQuery('#slider_3341');
-        owl.owlCarousel();
-        var carousel = jQuery('#slider_3341').data('owl.carousel');
-        jQuery()
-        console.log(carousel.relative(jQuery(".owl-item.active").index()));
-      //  carousel.to(carousel.relative(jQuery(this).index()));
-        // Listen to owl events:
-      // owl.on('changed.owl.carousel', function(event) {
-        //   console.log("wdfdsf");
-        // });
- });*/
-    console.log(jQuery("label[for=payment_method_stripe_applepay]").length);
     if(jQuery("label[for=payment_method_stripe_applepay]").length){
 
         jQuery("label[for=payment_method_stripe_applepay]").find("img").attr("src","<?php echo get_template_directory_uri(); ?>/assets/images/apple-pay.jpg");
