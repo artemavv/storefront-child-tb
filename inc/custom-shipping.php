@@ -696,8 +696,16 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	
 	public $product_has_warehouses = false;
 	
-	// Set by site admin, for each product individually
+	// Warehouse availability is et by site admin, for each product individually
+	
+	public $available_warehouse_names = array();
 	public $available_warehouses = array();
+	
+	/**
+	 * See get_delivery_settings_for_warehouse() for the ssetting format
+	 */
+	public $delivery_settings_am = false; // settings for the warehouse in Armenia (am)
+	public $delivery_settings_us = false; // settings for the warehouse in for USA (us)
 	
 	/**
 	 * a subset of all possible shipping options
@@ -707,12 +715,23 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	 */
 	public $shipping_options = array();
 	
+	
+	public const RETURN_NOTICE = 'Buyers are responsible for return postage costs. If the item is not returned in its original condition, the buyer is responsible for any loss in value.';
+	
+	public const EXPRESS_NOTICE = 'For delivery within USA, we are using FedEx Express';
+	
+	public const DATE_NOTICE = 'Your order should arrive by this date if you buy today. '
+					. 'To calculate an estimated delivery date you can count on, we look at things like '
+					. 'the carrier\'s latest transit times, '
+					. 'and where the order is shipping to and from.';
+	
 	/**
 	 * @param WC_Product $product
 	 */
-	public function __construct( $product ) {
+	public function __construct( $product, $customer_country = 'US' ) {
 		$this->product = $product;
 		$this->product_id = $product->get_id();
+		$this->customer_country = $customer_country;
 		
 		self::load_options();
 		
@@ -722,10 +741,26 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		
 		$this->available_warehouse_names = $product->get_attribute( 'warehouse' );
-		$this->available_warehouses = self::find_warehouses_by_names( $warehouse_names );
+		$this->available_warehouses      = self::find_warehouses_by_names( $warehouse_names );
+		
+		$this->delivery_settings_am     = $this->get_delivery_settings_for_warehouse( 'am', $this->customer_country );
+		$this->delivery_settings_us     = $this->get_delivery_settings_for_warehouse( '', $this->customer_country );
+		
+		// produces array: [ 'standard', 'express' ]
+		$this->delivery_times = $this->find_delivery_times();
+		$this->delivery_costs = $this->find_delivery_costs();
 		$this->product_has_warehouses = is_array( $this->available_warehouses ) && ( count( $this->available_warehouses ) > 0 );
 	}
 	
+	// TODO
+	public function find_delivery_times() {
+		
+	}
+	
+	// TODO
+	public function find_delivery_costs() {
+		
+	}
 	
 	public static function find_warehouses_by_names( array $names ) {
 	
@@ -841,6 +876,87 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return $out;
 	}
 	
+	
+	
+	/**
+	 * 
+	 * @param string $warehouse_id - "am" or "us"
+	 * @param string $country Two-letter country code, e.g. JP, GE, US, RU
+	 * @return array
+	 */
+	public function get_delivery_settings_for_warehouse( string $warehouse_id, string $country ) {
+		
+		$option_name = self::OPTION_DELIVERY_ESTIMATES . '_' . $warehouse_id;
+		
+		$warehouse_delivery_data = get_option( $option_name , '' );
+		
+		$all_countries_settings = explode( "\r\n", $warehouse_delivery_data );
+		
+		// default values for standard delivery
+		$from     = self::$option_values[ $warehouse_id . '_delivery_min'];
+		$to       = self::$option_values[ $warehouse_id . '_delivery_max'];
+		$cost     = self::$option_values[ $warehouse_id . '_shipping_cost'];
+
+		// default values for express delivery
+		$from_exp = self::$option_values[ $warehouse_id . '_delivery_min_express'];
+		$to_exp   = self::$option_values[ $warehouse_id . '_delivery_max_express'];
+		$cost_exp = self::$option_values[ $warehouse_id . '_shipping_cost_express'];
+		
+		$delivery_settings = [
+			'from'       => $from,
+			'to'         => $to,
+			'cost'       => $cost,
+			'from_exp'   => $from_exp,
+			'to_exp'     => $to_exp,
+			'cost_exp'   => $cost_exp,
+		];
+		
+		/**
+		 * Example of $country_settings string: JP,20,30,0,4,5,12
+		 * 
+		 * JP - Japan
+		 * 20 - min delivery time is 20 days for standard shipping
+		 * 30 - max delivery time is 30 days for standard shipping
+		 * 0  - cost of standard shipping (it is free)
+		 * 4  - min delivery time is 4 days for express shipping
+		 * 5  - max delivery time is 5 days for express shipping
+		 * 12 - cost of express shipping
+		 *  
+		 */
+		
+		foreach ( $all_countries_settings as $country_settings ) {
+			
+			$country_settings = str_getcsv( $country_settings, ',' );
+			
+			if ( is_array($country_settings) && count( $country_settings ) >= 6 ) {
+				
+				if ( strtolower($country_settings[0]) == strtolower($country) )  {
+					
+					$from     = $country_settings[1];
+					$to       = $country_settings[2];
+					$cost     = $country_settings[3];
+
+					$from_exp = $country_settings[4];
+					$to_exp   = $country_settings[5];
+					$cost_exp = $country_settings[6];
+					
+					$delivery_settings = [
+						'from'       => $from,
+						'to'         => $to,
+						'cost'       => $cost,
+						'from_exp'   => $from_exp,
+						'to_exp'     => $to_exp,
+						'cost_exp'   => $cost_exp,
+					];
+					
+					break;
+				}
+			}
+		}
+		
+		return $delivery_settings;
+	}
+	
 	/**
 	 * 
 	 * @param string $warehouse_id - "am" or "us"
@@ -849,42 +965,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	 */
 	public function get_delivery_estimate_for_warehouse( string $warehouse_id, string $country, string $mode = 'standard' ) {
 		
-		$option_name = self::OPTION_DELIVERY_ESTIMATES . '_' . $warehouse_id;
-		
-		$warehouse_data = get_option( $option_name , '' );
-		
-		$estimates = explode( "\r\n", $warehouse_data );
-		
-		//echo( '>>>' . $warehouse . '<pre>' . print_r( $estimates , 1 ) . '</pre>---' . $country );
-		
-		if ( $mode == 'standard' ) {
-			$from = self::$option_values[ $warehouse_id . '_delivery_min'];
-			$to   = self::$option_values[ $warehouse_id . '_delivery_max'];
-		}
-		else {
-			$from = self::$option_values[ $warehouse_id . '_delivery_min_express'];
-			$to   = self::$option_values[ $warehouse_id . '_delivery_max_express'];
-		}
-			
-		foreach ( $estimates as $country_estimate ) {
-			
-			$country_estimate = str_getcsv( $country_estimate, ',' );
-			
-			if ( is_array($country_estimate) && count( $country_estimate ) >= 5 ) {
-				
-				if ( strtolower($country_estimate[0]) == strtolower($country) )  {
-					if ( $mode == 'standard' ) {
-						$from = 		$country_estimate[1];
-						$to   = 		$country_estimate[2];
-					}
-					else {
-						$from = 		$country_estimate[3];
-						$to   = 		$country_estimate[4];
-					}
-					break;
-				}
-			}
-		}
+
 		
 		return array( 'from' => $from, 'to' => $to );
 	}
@@ -895,9 +976,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		$delivery_date_estimated = $this->get_delivery_date_estimate();
 		
-		$return_notice = 'Buyers are responsible for return postage costs. If the item is not returned in its original condition, the buyer is responsible for any loss in value.';
-		
-		$line_about_delivery_estimate = '<li>' . $check_mark_icon . ' Arrives soon! Get it by <span class="tooltip-notice" data-notice="' . $return_notice . '">' . $delivery_date_estimated . '</span> if you order today</li>';
+		$line_about_delivery_estimate = '<li>' . $check_mark_icon . ' Arrives soon! Get it by <span class="tooltip-notice" data-tooltip="' . self::RETURN_NOTICE . '">' . $delivery_date_estimated . '</span> if you order today</li>';
 		$line_about_delivery_conditions = '<li>' . $check_mark_icon . ' Returns and exchanges accepted</li>';
 		
 		$out = '<ul class="shipping-details">'
@@ -936,17 +1015,21 @@ function display_shipping_conditions_block() {
 </svg>';
 	
 	$location_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 9a2 2 0 1 1-4 0 2 2 0 0 1 4 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M17.083 12.189 12 21l-5.083-8.811a6 6 0 1 1 10.167 0m-1.713-1.032.02-.033a4 4 0 1 0-6.78 0l.02.033 3.37 5.84z"></path></svg>';
+	
+	$date_notice = TannyBunny_Custom_Shipping_Helper::DATE_NOTICE;
+	$express_notice = TannyBunny_Custom_Shipping_Helper::EXPRESS_NOTICE;
+	$return_notice = TannyBunny_Custom_Shipping_Helper::RETURN_NOTICE;
 	?>
 	
 	<h4>Shipping and return policies</h4>
 		
 	<ul class="shipping-and-return">
-		<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" ><?php echo $standard_date; ?></span></li>
+		<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
 		<?php if ( $is_express_shipping_available ): ?>
-			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost; ?> (<span class="tooltip-notice" ><?php echo $express_date; ?>)</span></li>
+			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost; ?> (<span class="tooltip-notice"  data-tooltip="<?php echo $express_notice; ?>" ><?php echo $express_date; ?>)</span></li>
 		<?php endif; ?>
 			
-		<li><?php echo $box_icon; ?> <span class="tooltip-notice" >Returns & exchanges accepted</span> within 14 days</li>
+		<li><?php echo $box_icon; ?> <span class="tooltip-notice" data-tooltip="<?php echo $return_notice; ?>" >Returns & exchanges accepted</span> within 14 days</li>
 		<li><?php echo $location_icon; ?>  Ships from <strong><?php echo $shipping_locations; ?></strong></li>
 	</ul>
 	<?php

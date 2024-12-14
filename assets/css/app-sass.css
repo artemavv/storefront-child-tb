@@ -11186,10 +11186,11 @@ ul.shipping-details li svg.check-mark {
   margin-right: 5px;
 }
 
-span.tooltip-notice {
+.tooltip-notice {
   text-decoration: underline dashed;
   cursor: help;
   text-underline-position: under;
+  display:inline;
 }
 
 ul.shipping-and-return {
@@ -11204,4 +11205,33 @@ ul.shipping-and-return li {
 ul.shipping-and-return li svg {
   height: 24px;
   margin-right: 5px;
+}
+
+[data-tooltip]::before {
+    /* needed - do not touch */
+    content: attr(data-tooltip);
+    position: absolute;
+    opacity: 0;
+
+    /* customizable */
+    transition: all 0.15s ease;
+    padding: 10px;
+    border-radius: 12px;
+    width: 18.75em;
+    transform: translateY(27px) translateX(-35px);
+    border: 1px solid #e4e4e4;
+    background-color: #f3f3f3;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 3px 0px, rgba(0, 0, 0, 0.15) 0px 4px 8px 3px;
+}
+
+[data-tooltip]:hover::before {
+    /* needed - do not touch */
+    opacity: 1;
+
+    /* customizable */
+    margin-left: 2px;
+}
+
+[data-tooltip]:not([data-tooltip-persistent])::before {
+    pointer-events: none;
 }
