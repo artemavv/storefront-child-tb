@@ -1133,12 +1133,12 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 	$filter_value = $_GET['wpf_filter_warehouse'] ?? false;
 
 	switch ( $filter_value ) {
-		case 'armenia':
-			$selected = 'armenia';
+		case 'from-armenia':
+			$selected = 'from-armenia';
 			$warehouse_note = 'Shipping: 10-30 days to all countries. Free of charge.';
 			break;
-		case 'usa':
-			$selected = 'usa';
+		case 'from-usa':
+			$selected = 'from-usa';
 			
 			
 			if ( TannyBunny_Custom_Shipping_Helper::is_free_shipping_available() ) {
@@ -1163,13 +1163,13 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 	$warehouse_options = [
 		'armenia' => [
 			'title'				=> 'Armenia',
-			'url'					=> http_build_query( array_merge( $params, [ 'wpf_filter_warehouse' => 'armenia' ]  ) ),
-			'selected'		=> ( $selected == 'armenia' )
+			'url'					=> http_build_query( array_merge( $params, [ 'wpf_filter_warehouse' => 'from-armenia' ]  ) ),
+			'selected'		=> ( $selected == 'from-armenia' )
 		],
 		'usa' => [
 			'title'				=> 'USA',
-			'url'					=> http_build_query( array_merge( $params, [ 'wpf_filter_warehouse' => 'usa' ]  ) ),
-			'selected'		=> ( $selected == 'usa' )
+			'url'					=> http_build_query( array_merge( $params, [ 'wpf_filter_warehouse' => 'from-usa' ]  ) ),
+			'selected'		=> ( $selected == 'from-usa' )
 		],
 		'all' => [
 			'title'				=> 'All',
