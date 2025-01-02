@@ -4,29 +4,26 @@ if ( !defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! class_exists( 'FedEx_TannyBunny_Shipping_Method' ) ) {
+if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
 
-	class FedEx_TannyBunny_Shipping_Method extends WC_Shipping_Method {
+	class From_USA_Paid_Shipping_Method extends WC_Shipping_Method {
 
-		/**
-		 * Constructor for your shipping class 
-		 * 
-		 * @access public 
-		 * @return void 
-		 */
 		public function __construct() {
-			$this->id = 'tb_fedex_shipping';
-			$this->method_title = __( 'FedEx Shipping for TannyBunny', 'woocommerce' );
+			
+			$this->id = 'tb_paid_usa_shipping';
+			$this->method_title = __( 'Paid Shipping from USA', 'woocommerce' );
 			$this->method_description = __( 'Custom Shipping Method for TannyBunny', 'woocommerce' );
-			// Availability & Countries 
-			$this->availability = 'including';
+			
+			//$this->availability = 'including'; 
+			
+			// exclude countries where free shipping is available
 			$this->availability = 'excluding';
-			$this->countries = array(
-				'US', // Unites States of America 
-			);
+			$this->countries = TannyBunny_Custom_Shipping_Helper::free_shipping_countries( 'us' );
+			
 			$this->init();
+			
 			$this->enabled = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : 'yes';
-			$this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : __( 'FedEx Shipping', 'woocommerce' );
+			$this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : __( 'Paid Shipping', 'woocommerce' );
 		}
 
 		/**
@@ -60,14 +57,8 @@ if ( ! class_exists( 'FedEx_TannyBunny_Shipping_Method' ) ) {
 					'title' => __( 'Title', 'woocommerce' ),
 					'type' => 'text',
 					'description' => __( 'Title to be display on site', 'woocommerce' ),
-					'default' => __( 'FedEx Shipping', 'woocommerce' )
-				),
-				'weight' => array(
-					'title' => __( 'Weight (kg)', 'woocommerce' ),
-					'type' => 'number',
-					'description' => __( 'Maximum allowed weight', 'woocommerce' ),
-					'default' => 100
-				),
+					'default' => __( 'From USA', 'woocommerce' )
+				)
 			);
 		}
 
@@ -80,41 +71,38 @@ if ( ! class_exists( 'FedEx_TannyBunny_Shipping_Method' ) ) {
 		 */
 		public function calculate_shipping( $package = [] ) {
 
-			$weight = 0;
 			$cost = 0;
-			$country = $package["destination"]["country"];
+			$wc_product = false;
+			
+			$delivery_from_usa = true;
+			
 			foreach ( $package['contents'] as $item_id => $values ) {
-				$_product = $values['data'];
-				$weight = 123; // $weight + $_product->get_weight() * $values['quantity'];
+				$wc_product = new WC_Product( $values['product_id'] );
+				
+				$warehouse_names = array_filter( array_map( 'trim', explode( ',' , $wc_product->get_attribute( 'warehouse' ) ) ) );
+				$available_warehouses      = TannyBunny_Custom_Shipping_Helper::find_warehouses_by_names( $warehouse_names );
+				
+				if ( ! array_key_exists( 'us', $available_warehouses ) ) { // this product is not available in US warehouse
+					$delivery_from_usa = false;
+					break;
+				}
 			}
-			$weight = wc_get_weight( $weight, 'kg' );
-			if ( $weight <= 10 ) {
-				$cost = 3;
-			} elseif ( $weight <= 30 ) {
-				$cost = 5;
-			} elseif ( $weight <= 50 ) {
-				$cost = 10;
-			} else {
-				$cost = 20;
-			}
-			$countryZones = array(
-				'US' => 0,
-			);
-			$zonePrices = array(
-				0 => 10,
-				1 => 30,
-				2 => 50,
-				3 => 70
-			);
-			$zoneFromCountry = $countryZones[$country];
-			$priceFromZone = $zonePrices[$zoneFromCountry];
-			$cost += $priceFromZone;
-			$rate = array(
-				'id' => $this->id,
-				'label' => $this->title,
-				'cost' => $cost
-			);
-			$this->add_rate( $rate );
+			
+			if ( $delivery_from_usa && $wc_product ) {
+			
+				$country = $package["destination"]["country"];
+				
+				$shipping = new TannyBunny_Custom_Shipping_Helper( $wc_product, $country );
+				$dates = $shipping->get_delivery_date_estimate( 'standard', 'us' );
+				$cost = $shipping->get_delivery_cost( 'standard', 'us' );
+				
+				$rate = array(
+					'id' => $this->id,
+					'label' => $this->title . ' (Arrives: ' . $dates . ')',
+					'cost' => $cost
+				);
+				$this->add_rate( $rate );
+			}			
 		}
 	}
 
@@ -122,7 +110,7 @@ if ( ! class_exists( 'FedEx_TannyBunny_Shipping_Method' ) ) {
 
 
 function add_tannybunny_fedex_shipping_method( $methods ) {
-	$methods['tb_fedex_shipping'] = 'FedEx_TannyBunny_Shipping_Method';
+	$methods['tb_paid_usa_shipping'] = 'From_USA_Paid_Shipping_Method';
 	return $methods;
 }
 
@@ -162,5 +150,5 @@ function fedex_tannybunny_validate_order( $posted ) {
 	}
 }
 
-add_action( 'woocommerce_review_order_before_cart_contents', 'fedex_tannybunny_validate_order', 10 );
-add_action( 'woocommerce_after_checkout_validation', 'fedex_tannybunny_validate_order', 10 );
+//add_action( 'woocommerce_review_order_before_cart_contents', 'fedex_tannybunny_validate_order', 10 );
+//add_action( 'woocommerce_after_checkout_validation', 'fedex_tannybunny_validate_order', 10 );

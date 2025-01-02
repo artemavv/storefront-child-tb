@@ -53,9 +53,8 @@ $tags = get_terms( 'product_tag' );
 
                 <div class="tabs catalog-tabs">
 
-                    <?php echo do_shortcode('[slide-anything id="3341"]') ?> 
-
-                    
+										<?php echo do_shortcode('[tannybunny_warehouse_filter]'); ?> 
+										
                     <div class="tabs__content catalog-tabs__content">
                         <div class="tabs__content-item catalog-tabs__content-item active">
                             <div class="row">
