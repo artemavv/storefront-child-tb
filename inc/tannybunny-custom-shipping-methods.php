@@ -4,14 +4,14 @@ if ( !defined( 'WPINC' ) ) {
 	die;
 }
 
-if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
+if ( ! class_exists( 'From_USA_Shipping_Method' ) ) {
 
-	class From_USA_Paid_Shipping_Method extends WC_Shipping_Method {
+	class From_USA_Shipping_Method extends WC_Shipping_Method {
 
 		public function __construct() {
 			
-			$this->id = 'tb_paid_usa_shipping';
-			$this->method_title = __( 'Paid Shipping from USA', 'woocommerce' );
+			$this->id = 'tb_usa_shipping';
+			$this->method_title = __( 'Shipping from USA', 'woocommerce' );
 			$this->method_description = __( 'Custom Shipping Method for TannyBunny', 'woocommerce' );
 			
 			//$this->availability = 'including'; 
@@ -23,7 +23,8 @@ if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
 			$this->init();
 			
 			$this->enabled = isset( $this->settings['enabled'] ) ? $this->settings['enabled'] : 'yes';
-			$this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : __( 'Paid Shipping', 'woocommerce' );
+			$this->title = isset( $this->settings['title'] ) ? $this->settings['title'] : __( 'Shipping', 'woocommerce' );
+			$this->title_express = isset( $this->settings['title_express'] ) ? $this->settings['title_express'] : __( 'Express Shipping', 'woocommerce' );
 		}
 
 		/**
@@ -56,8 +57,14 @@ if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
 				'title' => array(
 					'title' => __( 'Title', 'woocommerce' ),
 					'type' => 'text',
-					'description' => __( 'Title to be display on site', 'woocommerce' ),
+					'description' => __( 'Title to be displayed on checkout', 'woocommerce' ),
 					'default' => __( 'From USA', 'woocommerce' )
+				),
+				'title_express' => array(
+					'title' => __( 'Title for Express delivery', 'woocommerce' ),
+					'type' => 'text',
+					'description' => __( 'Title to be displayed on checkout', 'woocommerce' ),
+					'default' => __( 'From USA - Express', 'woocommerce' )
 				)
 			);
 		}
@@ -93,15 +100,31 @@ if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
 				$country = $package["destination"]["country"];
 				
 				$shipping = new TannyBunny_Custom_Shipping_Helper( $wc_product, $country );
-				$dates = $shipping->get_delivery_date_estimate( 'standard', 'us' );
 				$cost = $shipping->get_delivery_cost( 'standard', 'us' );
 				
-				$rate = array(
-					'id' => $this->id,
-					'label' => $this->title . ' (Arrives: ' . $dates . ')',
-					'cost' => $cost
-				);
-				$this->add_rate( $rate );
+				if ( $cost >= 0 ) { // negative value indicates inavailable delivery
+					
+					$dates = $shipping->get_delivery_date_estimate( 'standard', 'us' );
+					$rate = array(
+						'id' => $this->id,
+						'label' => $this->title . ' (Arrives: ' . $dates . ')',
+						'cost' => $cost
+					);
+					$this->add_rate( $rate );
+				}
+				
+				$express_cost = $shipping->get_delivery_cost( 'express', 'us' );
+				
+				if ( $express_cost >= 0 ) { // negative value indicates inavailable delivery
+					
+					$dates = $shipping->get_delivery_date_estimate( 'express', 'us' );
+					$rate = array(
+						'id' => $this->id . '_express',
+						'label' => $this->title_express . ' (Arrives: ' . $dates . ')',
+						'cost' => $express_cost
+					);
+					$this->add_rate( $rate );
+				}
 			}			
 		}
 	}
@@ -110,7 +133,7 @@ if ( ! class_exists( 'FromUSA_TannyBunny_Shipping_Method' ) ) {
 
 
 function add_tannybunny_fedex_shipping_method( $methods ) {
-	$methods['tb_paid_usa_shipping'] = 'From_USA_Paid_Shipping_Method';
+	$methods['tb_usa_shipping'] = 'From_USA_Shipping_Method';
 	return $methods;
 }
 

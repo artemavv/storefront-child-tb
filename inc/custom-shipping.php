@@ -706,24 +706,41 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 	}
 }
 
-
+/**
+ * This class instantiates a helper for the specified product,
+ * and gathers all delivery info related TO THAT PRODUCT.
+ * 
+ * Each method of this class acts upon the delivery settings for the specified product!
+ * 
+ * Warehouse availability is set by site admin, for each product individually.
+ * 
+ * This class finds delivery settings for the specified product and uses them to calculate delivery times.
+ */
 class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core {
 	
 	private $product = false;
 	private $product_id = false;
+	private $customer_country = false;
 	
 	public $product_has_warehouses = false;
 	
-	// Warehouse availability is set by site admin, for each product individually
+	/**
+	 * may be "Armenia, USA" or "Armenia" or "USA" 
+	 * @var string 
+	 */
+	public $available_warehouse_names = ''; 
 	
-	public $available_warehouse_names = array();
+	/**
+	 * array of warehouses, of format [ 'Armenia' => 'am' ]
+	 * @var array
+	 */
 	public $available_warehouses = array();
 	
 	/**
-	 * See get_delivery_settings_for_warehouse() for the ssetting format
+	 * See get_delivery_settings_for_warehouse() for the setting format
 	 */
-	public $delivery_settings_am = false; // settings for the warehouse in Armenia (am)
-	public $delivery_settings_us = false; // settings for the warehouse in for USA (us)
+	public $country_delivery_settings_am = false; // country settings for the warehouse in Armenia (am)
+	public $country_delivery_settings_us = false; // country settings for the warehouse in for USA (us)
 	
 	/**
 	 * a subset of all possible shipping options
@@ -743,6 +760,8 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 					. 'the carrier\'s latest transit times, '
 					. 'and where the order is shipping to and from.';
 	
+	
+	public const DELIVERY_NOT_FOUND = -1;
 	/**
 	 * @param WC_Product $product
 	 */
@@ -753,17 +772,19 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		self::load_options();
 		
-		// get an array of options from a string "Armenia, USA"
-		// make an empty array if there are no warehouses
-		$warehouse_names = array_filter( array_map( 'trim', explode( ',' , $product->get_attribute( 'warehouse' ) ) ) );
 		
-		
+		// string "Armenia, USA" or similar
 		$this->available_warehouse_names = $product->get_attribute( 'warehouse' );
+		
+		// get an array of options from a string "Armenia, USA"
+		// also, make sure this is an empty array if there are no warehouses ( by using 'array_filter')
+		$warehouse_names = array_filter( array_map( 'trim', explode( ',' , $this->available_warehouse_names ) ) );
+		
+		
 		$this->available_warehouses      = self::find_warehouses_by_names( $warehouse_names );
 		
-		$this->delivery_settings_am     = $this->get_delivery_settings_for_warehouse( 'am', $this->customer_country );
-		$this->delivery_settings_us     = $this->get_delivery_settings_for_warehouse( 'us', $this->customer_country );
-		
+		$this->country_delivery_settings_am     = $this->get_delivery_settings_for_warehouse( 'am', $this->customer_country );
+		$this->country_delivery_settings_us     = $this->get_delivery_settings_for_warehouse( 'us', $this->customer_country );
 		
 		$this->product_has_warehouses = is_array( $this->available_warehouses ) && ( count( $this->available_warehouses ) > 0 );
 	}
@@ -779,6 +800,12 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return $countries_list;
 	}
 	
+	/**
+	 * Returns array of warehouses, of format [ 'Armenia' => 'am' ]
+	 * 
+	 * @param array $names
+	 * @return array
+	 */
 	public static function find_warehouses_by_names( array $names ) {
 	
 		$result = array();
@@ -797,6 +824,11 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return $result;
 	}
 	
+	/**
+	 * Used in {THEME_DIR}/woocommerce/single-product/title.php
+	 * 
+	 * @return string
+	 */
 	public function render_warehouse_options() {
 		
 		$out = '';
@@ -813,6 +845,9 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	
 	public static function get_customer_country() {
 		
+		
+		return 'GE';
+			
 		if ( class_exists( 'WC_Geolocation' ) ) {
 			$location = WC_Geolocation::geolocate_ip();
 
@@ -848,12 +883,17 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			
 			// iterate through warehouses to find the fastest delivery time
 			foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
-				$estimate_in_days = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode );
+				$estimate_in_days = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode ); // may return false
 
-				if ( $estimate_in_days['from'] < $min_delivery_time ) {
-					$min_delivery_time = $estimate_in_days['from'];
-					$max_delivery_time = $estimate_in_days['to'];
-				}
+				// echo(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
+				
+				if ( is_array( $estimate_in_days ) ) {
+					if ( $estimate_in_days['from'] < $min_delivery_time ) {
+						$min_delivery_time = $estimate_in_days['from'];
+						$max_delivery_time = $estimate_in_days['to'];
+					}
+				} 
+				
 			}
 		}
 		else { // use default estimates since the product does not have warehouses listed
@@ -871,20 +911,70 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return array( 'from' => $min_delivery_time, 'to' => $max_delivery_time );
 	}
 	
-	// TODO
+	/**
+	 * Checks whether there are at least one express shipping method available
+	 * @return bool
+	 */
 	public function is_express_shipping_available() {
-		return true;
+		
+		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
+			$estimate = $this->estimate_delivery_for_warehouse( $warehouse_id, 'express' ); // may return false when express shipping is not available
+			
+			if ( is_array($estimate) )  {
+				return true;
+			}
+		
+		}
+		
+		return false;
 	}
 	
-	// TODO
-	public static function is_free_shipping_available() {
-		return true;
+	
+	/**
+	 * Checks whether there are free shipping method available for the specified warehouse and country
+	 * @return bool
+	 */
+	public static function is_free_shipping_available_for_country( $warehouse_id = 'us', $country = 'JP' ) {
+		
+		$country_delivery_settings = self::get_delivery_settings_for_warehouse( $warehouse_id, strtoupper($country) );
+		
+		echo('$country_delivery_settings<pre>' . print_r( $country_delivery_settings , 1 ) . '</pre>' );
+		if ( $country_delivery_settings['cost'] == 0 ) {
+			return true;
+		}
+		
+		return false;
 	}
 	
-	// TODO
+	/**
+	 * Checks whether there are at least one free shipping method available
+	 * @return bool
+	 */
+	public function is_free_shipping_available() {
+		
+		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
+			$estimate = $this->get_delivery_settings_for_warehouse( $warehouse_id, $this->customer_country );
+			
+			if ( is_array($estimate) && $estimate['cost'] == 0 )  {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Calculates expected delivery costs given the mode and restrictions.
+	 * Returns DELIVERY_NOT_FOUND if there are no possible way to delvier the product (given the restrictions).
+	 * 
+	 * @param string $mode "standard" or "express"
+	 * @param string $warehouse_restriction "am" or "us"
+	 * @return integer
+	 */
 	public function get_delivery_cost( $mode = 'standard', $warehouse_restriction = '' ) {
 		
 		$min_cost = 999;
+		$found_delivery = false;
 		
 		if ( ! $warehouse_restriction ) {
 			$available_warehouses = $this->available_warehouses;
@@ -892,19 +982,42 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		else {
 			$available_warehouses = array( $warehouse_restriction => 'Warehouse' );
 		}
+		
+		if ( ! $this->product_has_warehouses ) { // when no warehouses are expicitly listed for the product assume that product will be shipped from Armenia
+			
+			if ( $warehouse_restriction != 'am' ) {
+				return self::DELIVERY_NOT_FOUND; // product does not have any non-armenian warehouses
+			}
+			else {
+				$available_warehouses = array( 'Armenia' => 'am' );
+			}
+		}
 			
 		// iterate through warehouses to find the cheapest delivery
 		foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
 			$estimate = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode );
 
 			if ( $estimate['cost'] < $min_cost ) {
+				$found_delivery = true;
 				$min_cost = $estimate['cost'];
 			}
 		}
 		
-		return $min_cost;
+		if ( $found_delivery ) {
+			return $min_cost;
+		}
+		else {
+			return self::DELIVERY_NOT_FOUND;
+		}
 	}
 	
+	/**
+	 * Returns a string with estimated dates of delivery. e.g "20 Nov-30 Dec"
+	 * 
+	 * @param string $mode "standard" or "express"
+	 * @param string $warehouse_restriction "am" or "us"
+	 * @return string e.g "20 Nov-30 Dec"
+	 */
 	public function get_delivery_date_estimate( $mode = 'standard', $warehouse_restriction = '' ) {
 		$estimate_in_days = $this->get_delivery_estimate( $mode, $warehouse_restriction );
 		
@@ -931,12 +1044,13 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	
 	
 	/**
+	 * Gets delivery settings for the specified country
 	 * 
 	 * @param string $warehouse_id - "am" or "us"
 	 * @param string $country Two-letter country code, e.g. JP, GE, US, RU
 	 * @return array
 	 */
-	public function get_delivery_settings_for_warehouse( string $warehouse_id, string $country ) {
+	public static function get_delivery_settings_for_warehouse( string $warehouse_id, string $country ) {
 		
 		$option_name = self::OPTION_DELIVERY_ESTIMATES . '_' . $warehouse_id;
 		
@@ -954,7 +1068,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		$to_exp   = self::$option_values[ $warehouse_id . '_delivery_max_express'];
 		$cost_exp = self::$option_values[ $warehouse_id . '_shipping_cost_express'];
 		
-		$free_cn  = self::$option_values[ $warehouse_id . '_free_delivery_countries'];
+		$free_cn  = array_map( 'strtoupper', array_map('trim', explode( ',', self::$option_values[ $warehouse_id . '_free_delivery_countries'] ) ) );
 		
 		$delivery_settings = [
 			'from'       => $from,
@@ -963,7 +1077,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			'from_exp'   => $from_exp,
 			'to_exp'     => $to_exp,
 			'cost_exp'   => $cost_exp,
-			'free_cn'    => $free_cn
+			'free_cn'    => $free_cn // list of countries with free shipping
 		];
 		
 		/**
@@ -973,10 +1087,11 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		 * 20 - min delivery time is 20 days for standard shipping
 		 * 30 - max delivery time is 30 days for standard shipping
 		 * 0  - cost of standard shipping (it is free)
-		 * 4  - min delivery time is 4 days for express shipping
-		 * 5  - max delivery time is 5 days for express shipping
+		 * 4  - min delivery time is 4 days for express shipping (set to 0 when express shipping is not available)
+		 * 5  - max delivery time is 5 days for express shipping (set to 0 when express shipping is not available)
 		 * 12 - cost of express shipping
 		 *  
+		 * 
 		 */
 		
 		foreach ( $all_countries_settings as $country_settings ) {
@@ -985,7 +1100,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			
 			if ( is_array($country_settings) && count( $country_settings ) >= 6 ) {
 				
-				if ( strtolower($country_settings[0]) == strtolower($country) )  {
+				if ( strtoupper($country_settings[0]) == strtoupper($country) )  {
 					
 					$from     = $country_settings[1];
 					$to       = $country_settings[2];
@@ -1002,6 +1117,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 						'from_exp'   => $from_exp,
 						'to_exp'     => $to_exp,
 						'cost_exp'   => $cost_exp,
+						'free_cn'    => $free_cn, // use default list of countries with free shipping
 					];
 					
 					break;
@@ -1009,23 +1125,36 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		
+		// special check for availability of free shipping
+		// * - indicates all countries
+		
+		if ( in_array( strtoupper($country), $free_cn ) || in_array( '*', $free_cn ) ) {
+			$delivery_settings['cost'] = 0;
+		}
+						
+		
 		return $delivery_settings;
 	}
 	
 	/**
+	 * Returns array of delivery parameters.
+	 * 
+	 * for all parameters, see get_delivery_settings_for_warehouse()
 	 * 
 	 * @param string $warehouse_id - "am" or "us"
-	 * @param string $country Two-letter country code, e.g. JP, GE, US, RU
+	 * @param string $mode "standard" or "express"
 	 * @return array
 	 */
 	public function estimate_delivery_for_warehouse( string $warehouse_id, string $mode = 'standard' ) {
 		
 		if ( $warehouse_id == 'am' ) {
-			$delivery_settings = $this->delivery_settings_am;
+			$delivery_settings = $this->country_delivery_settings_am;
 		}
 		else {
-			$delivery_settings = $this->delivery_settings_us;
+			$delivery_settings = $this->country_delivery_settings_us;
 		}
+		
+		$delivery_estimate = false;
 		
 		if ( $mode == 'standard' ) {
 			$delivery_estimate = array(
@@ -1035,13 +1164,17 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			);
 		}
 		else {
-			$delivery_estimate = array(
-				'from'   => $delivery_settings['from_exp'],
-				'to'     => $delivery_settings['to_exp'],
-				'cost'   => $delivery_settings['cost_exp']
-			);
+			
+			if ( $delivery_settings['from_exp'] > 0 && $delivery_settings['to_exp'] > 0 ) {
+				$delivery_estimate = array(
+					'from'   => $delivery_settings['from_exp'],
+					'to'     => $delivery_settings['to_exp'],
+					'cost'   => $delivery_settings['cost_exp']
+				);
+			}
 		}
 		
+		//echo(" delivery_estimate $warehouse_id $mode <pre>" . print_r( $delivery_estimate , 1 ) . '</pre>' );
 		return $delivery_estimate;
 	}
 	
@@ -1049,7 +1182,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		$check_mark_icon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="check-mark"><path d="M9.059 20.473 21.26 6.15l-1.52-1.298-10.8 12.675-4.734-4.734-1.414 1.414z"></path></svg>';
 		
-		$delivery_date_estimated = $this->get_delivery_date_estimate();
+		$delivery_date_estimated = $this->get_delivery_date_estimate( 'standard' );
 		
 		$line_about_delivery_estimate = '<li>' . $check_mark_icon . ' Arrives soon! Get it by <span class="tooltip-notice" data-tooltip="' . self::RETURN_NOTICE . '">' . $delivery_date_estimated . '</span> if you order today</li>';
 		$line_about_delivery_conditions = '<li>' . $check_mark_icon . ' Returns and exchanges accepted</li>';
@@ -1071,14 +1204,15 @@ function display_shipping_conditions_block() {
 	
 	global $product;
 	
-	$shipping = new TannyBunny_Custom_Shipping_Helper( $product );
+	$country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
+	
+	$shipping = new TannyBunny_Custom_Shipping_Helper( $product, $country );
 	
 	$shipping_locations = $shipping->available_warehouse_names ?: 'Armenia';
 	
 	$express_date       = $shipping->get_delivery_date_estimate( 'express' );
 	$standard_date      = $shipping->get_delivery_date_estimate( 'standard' );
-	$express_cost       = wc_price( $shipping->get_delivery_cost( 'express') );
-	
+	$express_cost       = wc_price( $shipping->get_delivery_cost( 'express' ) );
 	
 	$calendar_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.5 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 5H3v16h18V5h-3.5V3h-2v2h-7V3h-2zm0 2v1h2V7h7v1h2V7H19v3H5V7zM5 12v7h14v-7z"></path></svg>';
 	$box_icon        = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.5 15h-6c-.3 0-.5.2-.5.5s.2.5.5.5h6c.3 0 .5-.2.5-.5s-.2-.5-.5-.5m-6-1h4c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-4c-.3 0-.5.2-.5.5s.2.5.5.5m5 3h-5c-.3 0-.5.2-.5.5s.2.5.5.5h5c.3 0 .5-.2.5-.5s-.2-.5-.5-.5"></path><path d="m21.9 6.6-2-4Q19.6 2 19 2H5q-.6 0-.9.6l-2 4c-.1.1-.1.2-.1.4v14c0 .6.4 1 1 1h18c.6 0 1-.4 1-1V7c0-.2 0-.3-.1-.4M5.6 4h12.8l1 2H4.6zM4 20V8h16v12z"></path></svg>';
@@ -1097,7 +1231,11 @@ function display_shipping_conditions_block() {
 	<h4>Shipping and return policies</h4>
 		
 	<ul class="shipping-and-return">
-		<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
+		<?php if ( $shipping->is_free_shipping_available() ): ?>
+			<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
+		<?php else: ?>
+			<li><?php echo $free_shipping_icon; ?>  Standard shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
+		<?php endif; ?>
 		<?php if ( $shipping->is_express_shipping_available() ): ?>
 			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost; ?> (<span class="tooltip-notice"  data-tooltip="<?php echo $express_notice; ?>" ><?php echo $express_date; ?>)</span></li>
 		<?php endif; ?>
@@ -1140,10 +1278,9 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 		case 'from-usa':
 			$selected = 'from-usa';
 			
+			$country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
 			
-			if ( TannyBunny_Custom_Shipping_Helper::is_free_shipping_available() ) {
-				
-				$country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
+			if ( TannyBunny_Custom_Shipping_Helper::is_free_shipping_available_for_country( 'us', $country ) ) {
 				$warehouse_note = "Free shipping: 5-7 days (available for $country). Expedited shipping via FedEx is also available for " . wc_price(7.5) . '.';
 			}
 			else {

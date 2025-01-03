@@ -22,8 +22,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 the_title( '<h1 class="product_title entry-title product-info__title">', '</h1>' );
 global $product;
 
-
-$shipping = new TannyBunny_Custom_Shipping_Helper( $product );
+$country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
+$shipping = new TannyBunny_Custom_Shipping_Helper( $product, $country );
 
 $material = $product->get_attribute('materials');
 ?>
