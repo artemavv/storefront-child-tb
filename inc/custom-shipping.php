@@ -844,9 +844,6 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	}
 	
 	public static function get_customer_country() {
-		
-		
-		return 'GE';
 			
 		if ( class_exists( 'WC_Geolocation' ) ) {
 			$location = WC_Geolocation::geolocate_ip();
@@ -856,7 +853,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		
-		return 'US';
+		return 'US'; // default value
 	}
 	
 	/**
@@ -885,7 +882,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
 				$estimate_in_days = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode ); // may return false
 
-				// echo(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
+				//echo(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
 				
 				if ( is_array( $estimate_in_days ) ) {
 					if ( $estimate_in_days['from'] < $min_delivery_time ) {
@@ -938,7 +935,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		$country_delivery_settings = self::get_delivery_settings_for_warehouse( $warehouse_id, strtoupper($country) );
 		
-		echo('$country_delivery_settings<pre>' . print_r( $country_delivery_settings , 1 ) . '</pre>' );
+		//echo('$country_delivery_settings<pre>' . print_r( $country_delivery_settings , 1 ) . '</pre>' );
 		if ( $country_delivery_settings['cost'] == 0 ) {
 			return true;
 		}
@@ -997,7 +994,8 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
 			$estimate = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode );
 
-			if ( $estimate['cost'] < $min_cost ) {
+			if ( isset($estimate['cost']) && $estimate['cost'] < $min_cost ) {
+				
 				$found_delivery = true;
 				$min_cost = $estimate['cost'];
 			}
@@ -1020,6 +1018,10 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	 */
 	public function get_delivery_date_estimate( $mode = 'standard', $warehouse_restriction = '' ) {
 		$estimate_in_days = $this->get_delivery_estimate( $mode, $warehouse_restriction );
+		
+		
+		//echo('$estimate_in_days<pre>' . print_r( $estimate_in_days , 1 ) . '</pre>' );
+		
 		
 		$from_timestamp = time() + $estimate_in_days['from'] * DAY_IN_SECONDS;
 		$to_timestamp   = time() + $estimate_in_days['to'] * DAY_IN_SECONDS;
@@ -1080,6 +1082,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			'free_cn'    => $free_cn // list of countries with free shipping
 		];
 		
+		
 		/**
 		 * Example of $country_settings string: JP,20,30,0,4,5,12
 		 * 
@@ -1101,7 +1104,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			if ( is_array($country_settings) && count( $country_settings ) >= 6 ) {
 				
 				if ( strtoupper($country_settings[0]) == strtoupper($country) )  {
-					
+									
 					$from     = $country_settings[1];
 					$to       = $country_settings[2];
 					$cost     = $country_settings[3];
