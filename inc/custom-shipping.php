@@ -865,9 +865,10 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	public function get_delivery_estimate( $mode = 'standard', $warehouse_restriction = '' ) {
 		
 		//$delivery_country = self::get_customer_country();
+		tb_log(" get_customer_country " . $this->customer_country . '' );
 		
 		$min_delivery_time = 999999;
-		$max_delivery_time = 10;
+		$max_delivery_time = 1;
 		
 		if ( count( $this->available_warehouses ) ) {
 		
@@ -882,7 +883,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
 				$estimate_in_days = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode ); // may return false
 
-				//echo(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
+				tb_log(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
 				
 				if ( is_array( $estimate_in_days ) ) {
 					if ( $estimate_in_days['from'] < $min_delivery_time ) {
@@ -894,6 +895,8 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		else { // use default estimates since the product does not have warehouses listed
+			
+			tb_log(" DEFAULT get_delivery_estimate <pre>" . print_r( $this->customer_country , 1 ) . '</pre>' );
 			
 			if ( $mode == 'standard' ) {
 				$min_delivery_time = self::$option_values['am_delivery_min'];
@@ -986,7 +989,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 				return self::DELIVERY_NOT_FOUND; // product does not have any non-armenian warehouses
 			}
 			else {
-				$available_warehouses = array( 'Armenia' => 'am' );
+				$available_warehouses = array( 'am' => 'Armenia' );
 			}
 		}
 			
@@ -1029,7 +1032,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		$from_month = date( 'M', $from_timestamp );
 		$to_month   = date( 'M', $to_timestamp );
 		
-		if ( $from_month === $to_month ) { // output like "Nov 13-25"
+		if ( $from_month === $estimate_delivery_for_warehouseto_month ) { // output like "Nov 13-25"
 			$from = date( 'M j', $from_timestamp );
 			$to   = date( 'j', $to_timestamp );
 			$out  = "$from-$to";
@@ -1177,7 +1180,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		
-		//echo(" delivery_estimate $warehouse_id $mode <pre>" . print_r( $delivery_estimate , 1 ) . '</pre>' );
+		tb_log(" delivery_estimate $warehouse_id $mode <pre>" . print_r( $delivery_estimate , 1 ) . '</pre>' );
 		return $delivery_estimate;
 	}
 	
@@ -1346,3 +1349,11 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 	return $out;
 }
 
+
+function tb_log( $data ) {
+
+	$filename = pathinfo( __FILE__, PATHINFO_DIRNAME ) . DIRECTORY_SEPARATOR . 'tb-log.txt';
+	
+	file_put_contents( $filename, date( "Y-m-d H:i:s" ) . " | " . print_r( $data, 1 ) . "\r\n\r\n", FILE_APPEND );
+	
+}

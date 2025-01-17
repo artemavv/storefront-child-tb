@@ -239,7 +239,7 @@ if ( ! class_exists( 'From_Armenia_Shipping_Method' ) ) {
 				$warehouse_names = array_filter( array_map( 'trim', explode( ',' , $wc_product->get_attribute( 'warehouse' ) ) ) );
 				$available_warehouses      = TannyBunny_Custom_Shipping_Helper::find_warehouses_by_names( $warehouse_names );
 				
-				if ( ! array_key_exists( 'am', $available_warehouses ) ) { // this product is not available in US warehouse
+				if ( count($available_warehouses) &&  ! array_key_exists( 'am', $available_warehouses ) ) { // this product is not available in AM warehouse
 					$delivery_from_armenia = false;
 					break;
 				}
@@ -251,6 +251,8 @@ if ( ! class_exists( 'From_Armenia_Shipping_Method' ) ) {
 				
 				$shipping = new TannyBunny_Custom_Shipping_Helper( $wc_product, $country );
 				$cost = $shipping->get_delivery_cost( 'standard', 'am' );
+				
+				tb_log(" TannyBunny_Custom_Shipping_Helper $cost");
 				
 				if ( $cost >= 0 ) { // negative value indicates inavailable delivery
 					
