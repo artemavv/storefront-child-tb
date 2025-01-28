@@ -54,10 +54,14 @@ get_header(); ?>
                                           echo $terms[0]->name; ?>
                                       </h4>
                                       <div class="intro-slider__item-price">
-                                          <?php echo get_post_meta( get_field('main_product'), '_price', true); ?> $
                                           <?php
                                           // $price = number_format((float)$product->get_variation_price( 'min', true ), 2, '.', '');
                                           // echo $price.''.get_woocommerce_currency_symbol();  
+
+                                            $price = get_post_meta( get_field('main_product'), '_price', true);
+                                            $price_fm = do_shortcode('[woo_multi_currency_exchange price="' . $price . '" ]');
+
+                                            echo $price_fm;
                                           ?>
                                       </div>
                                   </div>
@@ -122,7 +126,37 @@ while ( $loop->have_posts() ): $loop->the_post(); ?>
                               ?></h3>
                               <h4 class="gallery__card-subtitle"><?php $terms = get_the_terms($product->get_id(), 'product_cat');
                                 echo $terms[0]->name; ?></h4>
-                              <div class="gallery__card-price"><?php echo $product->get_price() . ' $'; ?></div>
+                              <div class="gallery__card-price">
+                                <?php 
+                                                    
+                                    $price = round($product->get_variation_price('min', true));
+                                    $wmc = WOOMULTI_CURRENCY_Data::get_ins();
+
+                                    $currency = $wmc->get_current_currency();
+
+                                    $selected_currencies = $wmc->get_list_currencies();
+
+                                    if ( $currency && isset( $selected_currencies[ $currency ] ) && is_array( $selected_currencies[ $currency ] ) ) {
+                                        $data   = $selected_currencies[ $currency ];
+                                        $format = WOOMULTI_CURRENCY_Data::get_price_format( $data['pos'] );
+                                        $args   = array(
+                                            'currency'     => $currency,
+                                            'price_format' => $format
+                                        );
+                                        if ( isset( $data['decimals'] ) ) {
+                                            $args['decimals'] = absint( $data['decimals'] );
+                                        }
+
+                                        $price_fm = wc_price($price, $args);
+                                    }
+                                    else {
+                                        $price_fm = wc_price($price);
+                                    }
+                                    
+                                    //$price_fm =  do_shortcode('[woo_multi_currency_exchange price="' . $price . '" ]');
+                                    echo $price_fm;
+                                    ?>
+                              </div>
                               <div class="gallery__card-more">Read more</div>
                             </div>
                         </a>
