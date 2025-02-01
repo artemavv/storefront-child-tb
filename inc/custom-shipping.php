@@ -883,7 +883,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			foreach ( $available_warehouses as $warehouse_id => $warehouse_name ) {
 				$estimate_in_days = $this->estimate_delivery_for_warehouse( $warehouse_id, $mode ); // may return false
 
-				tb_log(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
+				//tb_log(" estimate_in_days  $warehouse_id, $mode <pre>" . print_r( $estimate_in_days , 1 ) . '</pre>' );
 				
 				if ( is_array( $estimate_in_days ) ) {
 					if ( $estimate_in_days['from'] < $min_delivery_time ) {
@@ -895,8 +895,6 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		else { // use default estimates since the product does not have warehouses listed
-			
-			tb_log(" DEFAULT get_delivery_estimate <pre>" . print_r( $this->customer_country , 1 ) . '</pre>' );
 			
 			if ( $mode == 'standard' ) {
 				$min_delivery_time = self::$option_values['am_delivery_min'];
@@ -1207,7 +1205,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			}
 		}
 		
-		tb_log(" delivery_estimate $warehouse_id $mode <pre>" . print_r( $delivery_estimate , 1 ) . '</pre>' );
+		//tb_log(" delivery_estimate $warehouse_id $mode <pre>" . print_r( $delivery_estimate , 1 ) . '</pre>' );
 		return $delivery_estimate;
 	}
 	
@@ -1641,6 +1639,80 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 	return $out;
 }
 
+/**
+ * Make sure that stock levels are reduced only for products shipped from USA warehouse
+ * 
+ * @param WC_Order $order
+ * @return int
+ */
+function reduce_product_stock_for_usa_only( $qty, $order, $item ) {
+
+	tb_log(" reduce_product_stock_for_usa_only  - START " );
+	
+	
+	// Attribute name and value to check
+	$warehouse_attribute = 'pa_warehouse';
+	$warehouse_usa = 74;
+	
+	$reduce_stock = false; // by default, DO NOT reduce stock for purchased products
+	
+	$shipping_from_usa = false;
+	
+	foreach( $order->get_shipping_methods() as $shipping_method ) {
+		
+		if ( $shipping_method->get_method_id() == 'tb_usa_shipping' ) {
+			$shipping_from_usa = true;
+			break;
+		}
+  }
+	
+	if ( $shipping_from_usa ) { // enable reducing stock quantity for USA shipping only
+		
+		$product = $item->get_product();
+
+		if ( $product ) {
+
+			if ( is_a( $product, 'WC_Product_Variation' ) ) {
+				$parent_product =	wc_get_product( $product->get_parent_id() );
+				$product_attributes = $parent_product->get_attributes();
+			}
+			else {
+				$product_attributes = $product->get_attributes();
+			}
+
+			// Check if the product has the specified attribute and value
+
+			if ( isset( $product_attributes[$warehouse_attribute] ) 
+					&& in_array( $warehouse_usa, $product_attributes[$warehouse_attribute]->get_options(), true ) ) {
+
+				$reduce_stock = true; // this product is located in USA warehouse
+			}
+		}
+	}
+	
+	tb_log(" shipping_from_usa  -  [ $shipping_from_usa ] " );
+
+	tb_log(" reduce_product_stock_for_usa_only  - RESULT [ $reduce_stock ] " );
+	
+	// Prevent stock reduction if the conditions are not met
+	if ( ! $reduce_stock ) {
+		return 0;
+	}
+	else {
+		return $qty;
+	}
+}
+
+/**
+ * Make sure that stock levels are reduced only for products shipped from USA warehouse
+ * 
+ * Filter order item quantity.
+ *
+ * @param int|float             $quantity Quantity.
+ * @param WC_Order              $order    Order data.
+ * @param WC_Order_Item_Product $item Order item data.
+ */
+add_filter( 'woocommerce_order_item_quantity', 'reduce_product_stock_for_usa_only', 10, 3 );
 
 function tb_log( $data ) {
 
