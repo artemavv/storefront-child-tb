@@ -910,25 +910,6 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	}
 	
 	/**
-	 * Checks whether there are at least one express shipping method available
-	 * @return bool
-	 */
-	public function is_express_shipping_available() {
-		
-		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
-			$estimate = $this->estimate_delivery_for_warehouse( $warehouse_id, 'express' ); // may return false when express shipping is not available
-			
-			if ( is_array($estimate) )  {
-				return true;
-			}
-		
-		}
-		
-		return false;
-	}
-	
-	
-	/**
 	 * Checks whether there are free shipping method available for the specified warehouse and country
 	 * @return bool
 	 */
@@ -954,6 +935,29 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			$estimate = $this->get_delivery_settings_for_warehouse( $warehouse_id, $this->customer_country );
 			
 			if ( is_array($estimate) && $estimate['cost'] == 0 )  {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Checks whether there are at least one free shipping method available
+	 * @return bool
+	 */
+	public function is_express_shipping_available() {
+		
+		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
+			
+			if ( $warehouse_id == 'am' ) {
+				$delivery_settings = $this->country_delivery_settings_am;
+			}
+			else {
+				$delivery_settings = $this->country_delivery_settings_us;
+			}
+			
+			if ( $delivery_settings['from_exp'] > 0 && $delivery_settings['to_exp'] > 0 ) {
 				return true;
 			}
 		}
@@ -1050,8 +1054,16 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	public function get_delivery_date_range( $warehouse_restriction = '' ) {
 		
 		$standard_estimate = $this->get_delivery_estimate( 'standard', $warehouse_restriction );
-		$express_estimate = $this->get_delivery_estimate( 'express', $warehouse_restriction );
 		
+		
+		if ( $this->is_express_shipping_available() ) {
+			$express_estimate = $this->get_delivery_estimate( 'express', $warehouse_restriction );
+		}
+		else {
+			$express_estimate = $standard_estimate;
+		}
+		
+		// Assuming that express delivery always faster or same as standard
 		$from_timestamp = time() + $express_estimate['from'] * DAY_IN_SECONDS; // minimum possible date
 		$to_timestamp   = time() + $standard_estimate['to'] * DAY_IN_SECONDS; // maximum possible date
 		
@@ -1087,6 +1099,8 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		$warehouse_delivery_data = get_option( $option_name , '' );
 		
 		$all_countries_settings = explode( "\r\n", $warehouse_delivery_data );
+		
+		$processing = self::$option_values[ $warehouse_id . '_processing_time'];
 		
 		// default values for standard delivery
 		$from     = self::$option_values[ $warehouse_id . '_delivery_min'];
@@ -1162,8 +1176,31 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		if ( in_array( strtoupper($country), $free_cn ) || in_array( '*', $free_cn ) ) {
 			$delivery_settings['cost'] = 0;
 		}
-						
 		
+		// include processing time required by warehouse
+		
+		$processing_days = $processing;
+		
+		$saturday = ( date('w') == 6 );
+		$sunday = ( date('w') == 0 );
+		
+		if ( $saturday ) {
+			$processing_days += 2;
+		}
+		else if ( $sunday ) {
+			$processing_days += 1;
+		}
+		
+		
+		$delivery_settings['from']     += $processing_days;
+		$delivery_settings['to']       += $processing_days;
+		
+		if ( $delivery_settings['from_exp'] > 0 ) { $delivery_settings['from_exp'] += $processing_days; }
+		if ( $delivery_settings['to_exp'] > 0 ) { $delivery_settings['to_exp'] += $processing_days; }
+		
+		
+	tb_log($delivery_settings);
+	
 		return $delivery_settings;
 	}
 	
@@ -1508,7 +1545,38 @@ function display_shipping_conditions_block() {
 	
 	$express_date       = $shipping->get_delivery_date_estimate( 'express' );
 	$standard_date      = $shipping->get_delivery_date_estimate( 'standard' );
-	$express_cost       = wc_price( $shipping->get_delivery_cost( 'express' ) );
+	$express_cost       = $shipping->get_delivery_cost( 'express' );
+
+	
+
+	$wmc = WOOMULTI_CURRENCY_Data::get_ins();
+
+	$currency = $wmc->get_current_currency();
+
+	$selected_currencies = $wmc->get_list_currencies();
+
+	if ( $currency && isset( $selected_currencies[ $currency ] ) && is_array( $selected_currencies[ $currency ] ) ) {
+
+		$express_cost = round( wmc_get_price( $express_cost, $currency ) );
+		
+		$data   = $selected_currencies[ $currency ];
+		$format = WOOMULTI_CURRENCY_Data::get_price_format( $data['pos'] );
+		$args   = array(
+			'currency'     => $currency,
+			'price_format' => $format
+		);
+
+		if ( isset( $data['decimals'] ) ) {
+			$args['decimals'] = absint( $data['decimals'] );
+		}
+
+		$express_cost_fm = wc_price( $express_cost, $args );
+	}
+	else {
+		$express_cost_fm = wc_price( $express_cost ); 
+	}
+
+	
 	
 	$calendar_icon   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.5 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M6.5 5H3v16h18V5h-3.5V3h-2v2h-7V3h-2zm0 2v1h2V7h7v1h2V7H19v3H5V7zM5 12v7h14v-7z"></path></svg>';
 	$box_icon        = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12.5 15h-6c-.3 0-.5.2-.5.5s.2.5.5.5h6c.3 0 .5-.2.5-.5s-.2-.5-.5-.5m-6-1h4c.3 0 .5-.2.5-.5s-.2-.5-.5-.5h-4c-.3 0-.5.2-.5.5s.2.5.5.5m5 3h-5c-.3 0-.5.2-.5.5s.2.5.5.5h5c.3 0 .5-.2.5-.5s-.2-.5-.5-.5"></path><path d="m21.9 6.6-2-4Q19.6 2 19 2H5q-.6 0-.9.6l-2 4c-.1.1-.1.2-.1.4v14c0 .6.4 1 1 1h18c.6 0 1-.4 1-1V7c0-.2 0-.3-.1-.4M5.6 4h12.8l1 2H4.6zM4 20V8h16v12z"></path></svg>';
@@ -1533,7 +1601,7 @@ function display_shipping_conditions_block() {
 			<li><?php echo $free_shipping_icon; ?>  Standard shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
 		<?php endif; ?>
 		<?php if ( $shipping->is_express_shipping_available() ): ?>
-			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost; ?> (<span class="tooltip-notice"  data-tooltip="<?php echo $express_notice; ?>" ><?php echo $express_date; ?>)</span></li>
+			<li><?php echo $express_shipping_icon; ?>  Express shipping for <?php echo $express_cost_fm; ?> (<span class="tooltip-notice"  data-tooltip="<?php echo $express_notice; ?>" ><?php echo $express_date; ?>)</span></li>
 		<?php endif; ?>
 			
 		<li><?php echo $box_icon; ?> <span class="tooltip-notice" data-tooltip="<?php echo $return_notice; ?>" >Returns & exchanges accepted</span> within 14 days</li>
@@ -1646,9 +1714,6 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
  * @return int
  */
 function reduce_product_stock_for_usa_only( $qty, $order, $item ) {
-
-	tb_log(" reduce_product_stock_for_usa_only  - START " );
-	
 	
 	// Attribute name and value to check
 	$warehouse_attribute = 'pa_warehouse';
@@ -1690,9 +1755,7 @@ function reduce_product_stock_for_usa_only( $qty, $order, $item ) {
 		}
 	}
 	
-	tb_log(" shipping_from_usa  -  [ $shipping_from_usa ] " );
-
-	tb_log(" reduce_product_stock_for_usa_only  - RESULT [ $reduce_stock ] " );
+	tb_log(" shipping_from_usa  -  [ $shipping_from_usa ] reduce_product_stock_for_usa_only  - RESULT [ $reduce_stock ] " );
 	
 	// Prevent stock reduction if the conditions are not met
 	if ( ! $reduce_stock ) {
