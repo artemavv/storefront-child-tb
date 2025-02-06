@@ -844,16 +844,22 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	}
 	
 	public static function get_customer_country() {
-			
+		
+		$result = 'US'; // default value
+		
 		if ( class_exists( 'WC_Geolocation' ) ) {
 			$location = WC_Geolocation::geolocate_ip();
 
 			if ( is_array($location) && isset($location['country']) && $location['country'] != '') {
-				return $location['country'];
+				$result = $location['country'];
 			}
 		}
 		
-		return 'US'; // default value
+		if ( isset( $_GET['tb_debug_customer_country'] ) ) {
+			$result = $_GET['tb_debug_customer_country'];
+		}
+		
+		return $result;
 	}
 	
 	/**
@@ -931,38 +937,69 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	 */
 	public function is_free_shipping_available() {
 		
+		$result = false;
+						
 		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
 			$estimate = $this->get_delivery_settings_for_warehouse( $warehouse_id, $this->customer_country );
 			
 			if ( is_array($estimate) && $estimate['cost'] == 0 )  {
-				return true;
+				$result = true;
 			}
 		}
 		
-		return false;
+		return $result;
+	}
+	
+	/**
+	 * Checks whether there are standard (non-express) delivery method available for the current product
+	 * ( from Armenia, or from US ) and for the current visitor's country
+	 * 
+	 * @return bool
+	 */
+	public function is_standard_shipping_available() {
+		
+		$result = true;
+		
+		// the case when there is only the US warehouse available
+		if ( array_key_exists( 'us', $this->available_warehouses ) && count($this->available_warehouses) == 1 ) {
+			
+			if ( ! self::is_free_delivery_available_for_country( $this->customer_country, 'us' ) ) {
+				// for US warehouse we don't provide standard shipping if the country is not in the list
+				$result = false;
+			}
+		}
+		
+		return $result;
 	}
 	
 	/**
 	 * Checks whether there are at least one free shipping method available
+	 * 
+	 * @param $target warehouse restriction ( 'am' or 'us'). Or "false", if no restriction
 	 * @return bool
 	 */
-	public function is_express_shipping_available() {
+	public function is_express_shipping_available( $target = false ) {
 		
+		$result = false;
+		$delivery_settings = false;
+
 		foreach ( $this->available_warehouses as $warehouse_id => $warehouse_name ) {
 			
-			if ( $warehouse_id == 'am' ) {
+			if ( $warehouse_id == 'am' && ( $target == 'am' || $target == false ) ) {
 				$delivery_settings = $this->country_delivery_settings_am;
 			}
-			else {
+			elseif ( $warehouse_id == 'us' && ($target == 'us' || $target == false ) ) {
 				$delivery_settings = $this->country_delivery_settings_us;
 			}
-			
-			if ( $delivery_settings['from_exp'] > 0 && $delivery_settings['to_exp'] > 0 ) {
-				return true;
+
+			if ( is_array($delivery_settings) && $delivery_settings['from_exp'] > 0 && $delivery_settings['to_exp'] > 0 ) {
+				$result = true;
+				break;
 			}
 		}
+
 		
-		return false;
+		return $result;
 	}
 	
 	/**
@@ -1053,8 +1090,14 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 	 */
 	public function get_delivery_date_range( $warehouse_restriction = '' ) {
 		
-		$standard_estimate = $this->get_delivery_estimate( 'standard', $warehouse_restriction );
+		$out = "???";
 		
+		if ( $this->is_standard_shipping_available() ) {
+			$standard_estimate = $this->get_delivery_estimate( 'standard', $warehouse_restriction );
+		}
+		else {
+			$standard_estimate = false;
+		}
 		
 		if ( $this->is_express_shipping_available() ) {
 			$express_estimate = $this->get_delivery_estimate( 'express', $warehouse_restriction );
@@ -1063,27 +1106,58 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 			$express_estimate = $standard_estimate;
 		}
 		
-		// Assuming that express delivery always faster or same as standard
-		$from_timestamp = time() + $express_estimate['from'] * DAY_IN_SECONDS; // minimum possible date
-		$to_timestamp   = time() + $standard_estimate['to'] * DAY_IN_SECONDS; // maximum possible date
+		if ( $standard_estimate && $express_estimate ) {
+			// Assuming that express delivery always faster or same as standard
+			$from_timestamp = time() + $express_estimate['from'] * DAY_IN_SECONDS; // minimum possible date
+			$to_timestamp   = time() + $standard_estimate['to'] * DAY_IN_SECONDS; // maximum possible date
+		}
+		else if ( $express_estimate ) {
+			$from_timestamp = time() + $express_estimate['from'] * DAY_IN_SECONDS;
+			$to_timestamp   = time() + $express_estimate['to'] * DAY_IN_SECONDS;
+		}
+		else if ( $standard_estimate ) {
+			$from_timestamp = time() + $standard_estimate['from'] * DAY_IN_SECONDS;
+			$to_timestamp   = time() + $standard_estimate['to'] * DAY_IN_SECONDS;
+		}
 		
-		$from_month = date( 'M', $from_timestamp );
-		$to_month   = date( 'M', $to_timestamp );
-		
-		if ( $from_month === $to_month ) { // output like "Nov 13-25"
-			$from = date( 'M j', $from_timestamp );
-			$to   = date( 'j', $to_timestamp );
-			$out  = "$from-$to";
-			
-		} else { // output like "Sep 13-Oct 25"
-			$from = date( 'M j', $from_timestamp );
-			$to   = date( 'M j', $to_timestamp );
-			$out  = "$from-$to";
+		if ( $from_timestamp && $to_timestamp ) {
+			$from_month = date( 'M', $from_timestamp );
+			$to_month   = date( 'M', $to_timestamp );
+
+			if ( $from_month === $to_month ) { // need to output it like "Nov 13-25"
+				$from = date( 'M j', $from_timestamp );
+				$to   = date( 'j', $to_timestamp );
+				$out  = "$from-$to";
+			} 
+			else { // need to output it like "Sep 13-Oct 25"
+				$from = date( 'M j', $from_timestamp );
+				$to   = date( 'M j', $to_timestamp );
+				$out  = "$from-$to";
+			}
 		}
 		
 		return $out;
 	}
 	
+	
+	public static function get_list_of_free_delivery_countries( $warehouse_id ) {
+		$countries_list = self::$option_values[ $warehouse_id . '_free_delivery_countries'];
+		return array_map( 'strtoupper', array_map('trim', explode( ',', $countries_list ) ) );
+	}
+	
+	public static function is_free_delivery_available_for_country( $country, $warehouse_id ) {
+		
+		$result = false;
+		
+		$countries_list = self::get_list_of_free_delivery_countries( $warehouse_id );
+		
+		// * - indicates all countries
+		if ( in_array( strtoupper($country), $countries_list ) || in_array( '*', $countries_list ) ) {
+			$result = true;
+		}
+		
+		return $result;
+	}
 	
 	/**
 	 * Gets delivery settings for the specified country
@@ -1112,7 +1186,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		$to_exp   = self::$option_values[ $warehouse_id . '_delivery_max_express'];
 		$cost_exp = self::$option_values[ $warehouse_id . '_shipping_cost_express'];
 		
-		$free_cn  = array_map( 'strtoupper', array_map('trim', explode( ',', self::$option_values[ $warehouse_id . '_free_delivery_countries'] ) ) );
+		$free_cn  = self::get_list_of_free_delivery_countries( $warehouse_id );
 		
 		$delivery_settings = [
 			'from'       => $from,
@@ -1171,9 +1245,7 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		}
 		
 		// special check for availability of free shipping
-		// * - indicates all countries
-		
-		if ( in_array( strtoupper($country), $free_cn ) || in_array( '*', $free_cn ) ) {
+		if ( self::is_free_delivery_available_for_country( $country, $warehouse_id ) ) {
 			$delivery_settings['cost'] = 0;
 		}
 		
@@ -1224,14 +1296,14 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		
 		$delivery_estimate = false;
 		
-		if ( $mode == 'standard' ) {
+		if ( $mode == 'standard' && $this->is_standard_shipping_available( $warehouse_id) ) {
 			$delivery_estimate = array(
 				'from'   => $delivery_settings['from'],
 				'to'     => $delivery_settings['to'],
 				'cost'   => $delivery_settings['cost']
 			);
 		}
-		else {
+		else if ( $mode == 'express' && $this->is_express_shipping_available( $warehouse_id ) ) {
 			
 			if ( $delivery_settings['from_exp'] > 0 && $delivery_settings['to_exp'] > 0 ) {
 				$delivery_estimate = array(
@@ -1597,7 +1669,7 @@ function display_shipping_conditions_block() {
 	<ul class="shipping-and-return">
 		<?php if ( $shipping->is_free_shipping_available() ): ?>
 			<li><?php echo $free_shipping_icon; ?>  Free shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
-		<?php else: ?>
+		<?php elseif ( $shipping->is_standard_shipping_available() ): ?>
 			<li><?php echo $free_shipping_icon; ?>  Standard shipping &mdash; get it by <span class="tooltip-notice" data-tooltip="<?php echo $date_notice; ?>"><?php echo $standard_date; ?></span></li>
 		<?php endif; ?>
 		<?php if ( $shipping->is_express_shipping_available() ): ?>
@@ -1777,6 +1849,10 @@ function reduce_product_stock_for_usa_only( $qty, $order, $item ) {
  */
 add_filter( 'woocommerce_order_item_quantity', 'reduce_product_stock_for_usa_only', 10, 3 );
 
+
+/**
+ * Logs are the best friend of a debugger
+ */
 function tb_log( $data ) {
 
 	$filename = pathinfo( __FILE__, PATHINFO_DIRNAME ) . DIRECTORY_SEPARATOR . 'tb-log.txt';
