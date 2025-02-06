@@ -252,6 +252,10 @@ if ( ! class_exists( 'From_Armenia_Shipping_Method' ) ) {
 				$shipping = new TannyBunny_Custom_Shipping_Helper( $wc_product, $country );
 				$cost = $shipping->get_delivery_cost( 'standard', 'am' );
 				
+				if ( ! $shipping->is_standard_shipping_available() ) {
+					$cost = -1;
+				}
+				
 				tb_log(" TannyBunny_Custom_Shipping_Helper $cost");
 				
 				if ( $cost >= 0 ) { // negative value indicates inavailable delivery

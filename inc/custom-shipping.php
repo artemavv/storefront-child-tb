@@ -563,7 +563,7 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 				'label' => 'Default cost of shipping',
 				'min' => 0,
 				'max' => 100,
-				'step' => 1,
+				'step' => 0.1,
 				'value' => self::$option_values['us_shipping_cost'],
 			),
 			array(
@@ -572,7 +572,7 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 				'label' => 'Default cost of express shipping',
 				'min' => 0,
 				'max' => 100,
-				'step' => 1,
+				'step' => 0.1,
 				'value' => self::$option_values['us_shipping_cost_express'],
 			),
 			array(
@@ -1629,7 +1629,7 @@ function display_shipping_conditions_block() {
 
 	if ( $currency && isset( $selected_currencies[ $currency ] ) && is_array( $selected_currencies[ $currency ] ) ) {
 
-		$express_cost = round( wmc_get_price( $express_cost, $currency ) );
+		$express_cost = round( wmc_get_price( $express_cost, $currency ), 1 );
 		
 		$data   = $selected_currencies[ $currency ];
 		$format = WOOMULTI_CURRENCY_Data::get_price_format( $data['pos'] );
