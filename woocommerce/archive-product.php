@@ -77,7 +77,7 @@ $tags = get_terms( 'product_tag' );
                                             </div>
                                             <script>
                                             function openNav() {
-                                              document.getElementById("mySidenav").style.width = "100%";
+                                              document.getElementById("mySidenav").style.width = "67%";
                                               document.getElementById("main").style.marginLeft = "100%";
                                             }
 

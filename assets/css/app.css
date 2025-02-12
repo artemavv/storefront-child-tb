@@ -6133,3 +6133,744 @@ p {
 .flex-control-nav ol li {
   float: left;
 }
+
+
+/* MOVED HERE FROM THEME CUSTOMIZER */
+
+.wc-stripe-paymentRequest-icons-container{
+	width:100%
+}
+img.wc-stripe-paymentRequest-icon.gpay{
+	float:none !important;
+	margin:0 auto !important;
+	width:60% !important;
+	padding: 20px !important;
+}
+.entry-content ul{
+	list-style:circle;
+}
+.widget .widget-title, .widget .widgettitle {
+    font-size: 16px;
+    letter-spacing: 0;
+    border-bottom: 1px solid rgba(0, 0, 0, .05);
+    padding: 0;
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-family: 'Lato', Arial, Helvetica, sans-serif;
+}
+
+.pf_rngstyle_thin .irs-from, .pf_rngstyle_thin .irs-to, .pf_rngstyle_thin .irs-single {
+    color: #fff;
+    font-size: 10px;
+    line-height: 1.333;
+    text-shadow: none;
+    padding: 1px 5px;
+    background: #b35bd2;
+   
+}
+.pf_rngstyle_html5 .irs-bar {
+
+    border-top: 1px solid #b35bd2;
+    border-bottom: 1px solid #b35bd2;
+    background: #b35bd2;
+    background: #b35bd2;
+}
+.pf_rngstyle_html5 .irs-from, .pf_rngstyle_html5 .irs-to, .pf_rngstyle_html5 .irs-single {
+ 
+    background: #b35bd2;
+  
+}
+@media (max-width: 991px){
+
+	
+	
+.wpfFilterButtons .wpfButton {
+   margin-right: 15px;
+   
+    margin-left: 15px;
+}
+
+	
+	
+.wpfFilterWrapper[data-filter-type] {
+    padding: 5px 15px !important;
+}
+	
+	.desktop{
+		display:none !important;
+	}
+	
+	.mobile{
+		display: block !important;
+		 width: 90px;
+    margin: 0 0 auto auto;
+	}
+	
+
+	.for_mobile1{
+	float: left;
+	width: 50%;
+}
+.for_mobile2{
+	overflow: hidden;
+	width: 50%;
+}
+
+.for_mobile2 .pf_default_select i.prdctfltr-down, .for_mobile2 .pf_default_select i.prdctfltr-up {
+    position: absolute;
+    top: 0;
+    left: 49px;
+}
+
+.for_mobile2 .widget .widget-title, .for_mobile2 .widget .widgettitle {
+    
+    border-bottom: 1px solid transparent;
+   
+	
+}
+
+.for_mobile{
+	 display: flex;
+  flex-direction: row-reverse;
+}
+.for_mobile1 .prdctfltr_filter_title{
+	float: right;
+}
+	
+	.catalog-banner{
+ 
+    background: transparent;
+	
+   
+} 
+	
+
+.catalog-banner__text {
+display:block !important;
+	
+}
+
+	
+	
+
+	
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+.catalog-banner{
+ 
+    background: transparent;
+	
+   
+} 
+
+
+
+
+
+
+
+
+
+@media (max-width: 768px){
+	/**	.pagination{
+		display: none !important;
+	} **/
+
+	   .catalog-banner {
+    
+    margin: 0 0 59px 0;
+    
+   
+}
+	
+	.a-perfect-gift {
+
+    width: 92%!important;
+ 
+}
+.business-lady {
+
+    width: 92%!important;
+
+}
+.elves-in-the-city {
+
+    width: 92%!important;
+ 
+}
+.for-everyday-wear {
+
+    width: 92%!important;
+  
+}
+.little-princess {
+
+    width: 92%!important;
+    
+}
+.unisex {
+
+    width: 92%!important;
+    
+}
+.your-first-ear-cuff {
+
+    width: 92%!important;
+   
+}
+.your-spirit-animal {
+
+ 
+    width: 92%!important;
+    
+}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}
+
+
+
+
+@media (min-width: 767px){
+	
+
+	
+	
+.a-perfect-gift {
+background: url(https://tannybunny.com/wp-content/uploads/2022/07/Your-spirit-animal.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.business-lady {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Business-lady.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.elves-in-the-city {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Elves-in-the-city.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.for-everyday-wear {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/For-everyday-wear.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.little-princess {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Little-princess.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.unisex {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Unisex.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.your-first-ear-cuff {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Your-first-ear-cuff.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.your-spirit-animal {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Your-spirit-animal.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 144px;
+    position: absolute;
+    top: 62px;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+
+
+	
+	
+	
+	
+	
+
+
+	
+}
+
+.a-perfect-gift {
+background: url(https://tannybunny.com/wp-content/uploads/2022/07/Your-spirit-animal.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+	background-color: rgba(0,0,0,0.5);
+    position: absolute;                   
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.business-lady {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Business-lady.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.elves-in-the-city {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Elves-in-the-city.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.for-everyday-wear {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/For-everyday-wear.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.little-princess {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Little-princess.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.unisex {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Unisex.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.your-first-ear-cuff {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Your-first-ear-cuff.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+.your-spirit-animal {
+background: url(https://tannybunny.sirahstudio.com/wp-content/uploads/2022/07/Your-spirit-animal.jpg);
+    background-position: center right;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 150px;
+    position: absolute;
+    top: 0;
+    width: 94%;
+    right: 4%;
+    z-index: -1;
+    border-radius: 5px;
+    color: transparent;
+}
+
+
+
+
+
+
+
+
+
+
+
+.sidenav .closebtn {
+  display: block;
+	background: #FAFAFC;
+}
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 75px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 16px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+	color: #292929;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+
+
+#main {
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+
+
+
+
+
+
+
+
+.desktop{
+	display: block;
+
+}
+.mobile{
+	display: none;
+}
+
+.wpfFilterButton.wpfButton, .wpfClearButton.wpfButton {
+    padding: 5px;
+    align-items: center;
+    min-height: 52px;
+    border-radius: 4px;
+    font-size: 16;
+    text-decoration: none !important;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: normal;
+    cursor: pointer;
+    border: none;
+    font-weight: normal;
+    outline: none;
+    background: #B35BD2;
+    color: #fff;
+   max-width: 98% !important;
+	
+}
+
+.wpfFilterButton.wpfButton:hover, .wpfClearButton.wpfButton:hover {
+    padding: 5px;
+    align-items: center;
+    min-height: 52px;
+    border-radius: 4px;
+    font-size: 16;
+    text-decoration: none !important;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: normal;
+    cursor: pointer;
+    border: none;
+    font-weight: normal;
+    outline: none;
+    background: #A23CC5;
+    color: #fff !important;
+    
+	
+}
+
+.wpfFilterContent select{
+	border: none;
+	background: #fff !important;
+}
+
+.personal{
+	text-decoration: none !important;
+}
+
+/**#slider_3341{
+	display: none;
+} 
+.catalog .catalog-tabs__nav {
+    display: none !important;
+    
+} 
+
+#slider_3341 .owl-height{
+	height: 40px !important;
+}
+
+
+**/
+.catalog .catalog-tabs__nav {
+    display: none !important;
+    
+} 
+
+#slider_3341 .owl-height{
+
+}
+.catalog {
+    padding-top: 10px;
+}
+
+.personal.tabs__nav-item.catalog-tabs__nav-item{
+	margin-top: 18px;
+	margin-left: 20px;
+}
+.sa_owl_theme .owl-nav .owl-prev {
+    left: 0px !important;
+	
+}
+.sa_owl_theme .owl-nav .owl-next {
+    right: 0px !important;
+	
+}
+
+
+.term-description{
+	width: 70%
+}
+
+
+
+
+.catalog-banner__title {
+   
+    color: #333333;
+}
+.catalog-banner__text {
+   
+    color: #333333;
+}
+#slider_3341{
+	margin-bottom: 20px;
+}
+#payment .payment_methods li.wc_payment_method.payment_method_stripe_googlepay img{
+	max-height: 98px !important;
+    width: 83%;
+	padding-top: 10px;
+}
+.payment_method_stripe_payment_request{
+	padding-top:73px;
+}
+span.wc-stripe-card-icons-container img {
+    width: 24% !important;
+    max-width: unset !important;
+    max-height: unset !important;
+    height: auto !important;
+    margin-top: 10px ! IMPORTANT;
+}
+#payment .payment_methods li img{
+	max-height: unset !important;
+}
+
+/*li.payment_method_stripe_payment_request{
+	display:block !important;
+}*/
+
+
+
+body #ppc-button-ppcp-gateway {
+  padding-left: 27px;
+  padding-right: 27px;
+}
+
+body #payment .place-order {
+	padding: 0px;
+}
+
+body .checkout #payment .payment_methods > .wc_payment_method > label {
+	font-size: 20px;
+  line-height: 30px;
+}
+
+body .woocommerce-multi-currency.wmc-sidebar {
+	z-index:10;
+}
+
+
+body .rsfv-has-video video.rsfv-video,
+body .rsfv-has-video iframe.rsfv-video {
+	aspect-ratio: 3 / 4;
+}
+
+
+/* Shipping details */
+
+
+ul.shipping-details li {
+    font-size: 14px;
+    line-height: 17px;
+    background: #ffffff;
+    margin-bottom: 12px;
+}
+
+ul.shipping-details li svg.check-mark {
+    height: 16px;
+    fill: #3b67d9;
+    margin-right: 5px;
+}
+
+/* Warehouse filter - mobile screens */
+
+@media screen and (max-width: 900px) {
+	.warehouse_selector_container {
+		display: block;
+	}
+	
+	.warehouse_selector p {
+    margin: 0px;
+    padding: 0px;
+	}
+	
+}
+
+
+@media screen and (max-width: 500px) {
+	.warehouse_selector_note {
+	font-size: 14px;
+    padding-top: 15px;
+}
+	.warehouse_selector {
+		min-width: 50px;
+		margin-left: 10px;
+	}
+	
+	span.warehouse_selector_title {
+    font-size: 12px;
+}
+	
+.personal.tabs__nav-item.catalog-tabs__nav-item {
+	padding: 6px; 
+	margin: 0px;
+	}
+}
