@@ -40,33 +40,36 @@ get_header(); ?>
                               <img class="intro-slider__overlay-img" src="<?php echo get_template_directory_uri(); ?>/assets/img/intro-slider/decor.png" alt="">
                           </div>
                           
-                          <?php if (get_field('main_product')) : ?>
-                           
-                          <a href="<?php echo get_permalink(get_field('main_product')); ?>">
-                              <div class="intro-slider__item">
-                                  <img class="intro-slider__item-img" src="https://tannybunny.com/wp-content/uploads/2024/04/Kitsune.webp<?php /* the_field('main_product_img'); */ ?>" alt="">
-                                  <div class="intro-slider__item-content">
-                                      <h3 class="intro-slider__item-title">
-                                          <?php echo get_the_title( get_field('main_product') ); ?>
-                                      </h3>
-                                      <h4 class="intro-slider__item-subtitle">
-                                          <?php $terms = get_the_terms(get_field('main_product'), 'product_cat');
-                                          echo $terms[0]->name; ?>
-                                      </h4>
-                                      <div class="intro-slider__item-price">
-                                          <?php
-                                          // $price = number_format((float)$product->get_variation_price( 'min', true ), 2, '.', '');
-                                          // echo $price.''.get_woocommerce_currency_symbol();  
+													<?php $main_product_id = get_field('main_product'); ?>
+														
+                          <?php if ( $main_product_id ) : ?>
+                          
+														<?php $product_title = esc_attr(get_the_title( $main_product_id )); ?>
+														<a href="<?php echo get_permalink($main_product_id); ?>">
+																<div class="intro-slider__item">
+																		<img class="intro-slider__item-img" alt="<?php echo $product_title; ?>" src="<?php echo the_field('main_product_img'); ?>" >
+																		<div class="intro-slider__item-content">
+																				<h3 class="intro-slider__item-title">
+																						<?php echo $product_title; ?>
+																				</h3>
+																				<h4 class="intro-slider__item-subtitle">
+																						<?php $terms = get_the_terms( $main_product_id, 'product_cat');
+																						echo $terms[0]->name; ?>
+																				</h4>
+																				<div class="intro-slider__item-price">
+																						<?php
+																						// $price = number_format((float)$product->get_variation_price( 'min', true ), 2, '.', '');
+																						// echo $price.''.get_woocommerce_currency_symbol();  
 
-                                            $price = get_post_meta( get_field('main_product'), '_price', true);
-                                            $price_fm = do_shortcode('[woo_multi_currency_exchange price="' . $price . '" ]');
+																							$price = get_post_meta( $main_product_id, '_price', true);
+																							$price_fm = do_shortcode('[woo_multi_currency_exchange price="' . $price . '" ]');
 
-                                            echo $price_fm;
-                                          ?>
-                                      </div>
-                                  </div>
-                              </div>
-                          </a>
+																							echo $price_fm;
+																						?>
+																				</div>
+																		</div>
+																</div>
+														</a>
                           
                           <?php endif; ?>
                         </div>
@@ -84,9 +87,9 @@ get_header(); ?>
                 <div class="col-lg-6 mb-3">
                     <a href="<?php the_field('left_block_link'); ?>" class="gallery__item gallery__item_left">
                         <div class="gallery__item-img">
-						<?php if( get_field('left_block_img') ): ?>
-                            <img src="<?php the_field('left_block_img'); ?>" alt="">
-							<?php endif; ?>
+														<?php if( get_field('left_block_img') ): ?>
+																	<img src="<?php the_field('left_block_img'); ?>" alt="<?php the_field('left_block_title'); ?>">
+														<?php endif; ?>
                         </div>
                         <div class="gallery__item-content">
                             <h3 class="gallery__item-title"><?php the_field('left_block_title'); ?></h3>
@@ -101,22 +104,25 @@ get_header(); ?>
                     </a>
                 </div>		
                 <?php 
-$loop = new WP_Query( array( 
-  'post_type' => 'product', 
-  'posts_per_page' => 4,
-  'orderby' => 'menu_order', 
-  'order' => 'ASC',
-  )); 
-while ( $loop->have_posts() ): $loop->the_post(); ?>
-                                     <div class="col-lg-3 mb-3 d-none d-lg-block">
+										$loop = new WP_Query( array( 
+											'post_type' => 'product', 
+											'posts_per_page' => 4,
+											'orderby' => 'menu_order', 
+											'order' => 'ASC',
+										)); 
+										while ( $loop->have_posts() ): $loop->the_post(); ?>
+								
+								
+												<?php $product_title = get_the_title(); ?>
+                         <div class="col-lg-3 mb-3 d-none d-lg-block">
                        				
-<a href="<?php the_permalink(); ?>" class="gallery__card">
+														<a href="<?php the_permalink(); ?>" class="gallery__card">
                             <div class="gallery__card-img">
-                              <img src="<?php echo (get_field('product_cover') ? get_field('product_cover') : get_the_post_thumbnail_url()); ?>" "/>
+                              <img src="<?php echo (get_field('product_cover') ? get_field('product_cover') : get_the_post_thumbnail_url()); ?>" alt="<?php echo $product_title; ?>"/>
                             </div>
                             <div class="gallery__innerDesc">
                               <h3 class="gallery__card-title"><?php 
-                                $countSymbol = iconv_strlen(get_the_title());
+                                $countSymbol = iconv_strlen($product_title);
                                 
                                 if ($countSymbol < 67) {
                                   echo get_the_title();
@@ -182,7 +188,7 @@ while ( $loop->have_posts() ): $loop->the_post(); ?>
                         </div>
                         <div class="gallery__item-img">
 						<?php if( get_field('right_block_img') ): ?>
-                            <img src="<?php the_field('right_block_img'); ?>" alt="">
+                            <img src="<?php the_field('right_block_img'); ?>" alt="<?php the_field('right_block_title'); ?>">
 							<?php endif; ?>
                         </div>
                     </a>
@@ -198,104 +204,6 @@ while ( $loop->have_posts() ): $loop->the_post(); ?>
 <?php wp_reset_query(); // Remember to reset
    ?>
 
-
-<!-- 
-
-   <div class="products-slider">
-        <div class="container">
-            <h2 class="title">Popular ear cuffs</h2>
-            <div class="products-slider__wrapper">
-                <div class="swiper-container">
-                    <div class="swiper-wrapper">
-                      
-                      <?php if ( have_rows( 'popular_cuffs' ) ) : ?>
-                          <?php while ( have_rows( 'popular_cuffs' ) ) : the_row(); 
-                              $name = get_the_title( get_sub_field( 'cuff' ) );
-                          ?>
-                              <div class="product-card">
-                                  <div class="product-card__inner">
-                                
-                                      <a href="https://tannybunny.com/product/test-cuff/" class="product-card__img">
-                                          <img width="1588" height="2382" src="https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2.jpg" class="attachment-thumbnail-215x300 size-thumbnail-215x300 wp-post-image" alt="" srcset="https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2.jpg 1588w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-600x900.jpg 600w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-200x300.jpg 200w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-683x1024.jpg 683w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-768x1152.jpg 768w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-1024x1536.jpg 1024w, https://tannybunny.com/wp-content/uploads/2022/03/il_1588xN.2469443402_jgr2-1365x2048.jpg 1365w" sizes="(max-width: 1588px) 100vw, 1588px">            <div class="product-card__done-img">
-                                              <svg class="product-card__done-svg">
-                                                  <use xlink:href="/svg/sprite/sprite.svg#done"></use>
-                                              </svg>
-                                          </div>
-                                      </a>
-                                      <div class="product-card__innerDesc">
-                                          <h4 class="product-card__title"><?php echo $name; ?></h4>
-                                          <p class="product-card__descr">Каффы ручной работы</p>
-                                          <ul class="product-card__list">
-                                              <li class="product-card__list-item">
-                                                  Материал: <span>Silver</span>
-                                              </li>
-                                              <li class="product-card__list-item">
-                                                  Покрытие: <span>Left ear, Pair, Right ear</span>
-                                              </li>
-                                          </ul>
-                                          <div class="product-card__price">58$</div>
-                                      </div>
-                                             <button class="product-card__btn product-card__btn_add-favorite add-to-favorites" data-id="1518" data-action="add" data-page="catalog">
-                                           <a class="tinvwl_add_to_wishlist_button tinvwl-icon-heart  tinvwl-position-after ftinvwl-animated" data-tinv-wl-list="[]" data-tinv-wl-product="{{ data.post_id }}" data-tinv-wl-producttype="{{ data.product_type }}" data-tinv-wl-action=""><svg class="icon">
-                                    
-                                              <use xlink:href="https://tannybunny.com/wp-content/themes/storefront-child/assets/svg/sprite/sprite.svg#heart"></use>
-                                          </svg></a>
-                                      </button>
-                                               <div class="product-add__box-btn-wrap" id="product-add-to-cart__box-1518"><a href="https://tannybunny.com/product/test-cuff/">
-                                                          <button class="product-card__btn product-card__btn_add-cart btn btn-outline-primary" data-id="1518" data-quantity="1" data-page="catalog" data-variation="" data-material="79">
-                                              <svg class="icon">
-                                                  <use xlink:href="https://tannybunny.com/wp-content/themes/storefront-child/assets/svg/sprite/sprite.svg#cart"></use>
-                                              </svg>
-                                          </button></a>
-                                          </div>
-                               
-                                  </div>
-                              </div>
-                          <?php endwhile; ?>
-                      <?php endif; ?>
-   
-                    </div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-            <a href="/shop" class="btn btn-outline-primary products-slider__btn">Show all</a>
-        </div>
-    </div>
-
- -->
-
-
-
-
-<!--    <div class="idea">
-        <div class="container">
-            <h2 class="title">Idea for gifts</h2>
-            <div class="row">
-			<?php if( have_rows('gifts') ): ?>
-			<?php while( have_rows('gifts') ): the_row(); 
-			$image = get_sub_field('gift_img');
-			$name = get_sub_field('gift_name');
-			$link = get_sub_field('gift_link');
-
-		?>
-                <div class="col-lg-3 col-6 pr-1 pr-sm-3">
-				<?php if( $link ): ?>
-                    <a class="idea__item" href="<?php echo $link; ?>">
-			<?php endif; ?>
-						<img class="idea__item-img" src="<?php echo $image['url']; ?>" alt="<?php echo $image['alt'] ?>" />
-                        <h4 class="idea__item-title"><?php echo $name; ?></h4>
-                    <?php if( $link ): ?>
-				</a>
-			<?php endif; ?>
-                </div>
-               <?php endwhile; ?>
-               
-               <?php endif; ?>
-			   
-            </div>
-        </div>
-    </div> -->
-    
     
  <div class="about">
         <div class="container">
@@ -305,7 +213,7 @@ while ( $loop->have_posts() ): $loop->the_post(); ?>
                     <div class="about__item">
 					
 <?php if( get_field('author_img') ): ?>
-                <img  src="<?php the_field('author_img'); ?>" >
+                <img  src="<?php the_field('author_img'); ?>" alt="We are Tanya and Stephan, jewelry artists who devoted themselves to making ear cuffs." >
 				<?php endif; ?>
 					</div>
                 </div>
@@ -343,7 +251,7 @@ while ( $loop->have_posts() ): $loop->the_post(); ?>
                         </svg>
                         <h4 class="contacts__info-title">E-mail</h4>
                         <a class="contacts__info-link"
-                           href="mailto:<?php the_field('adress', 'option'); ?>"><?php the_field('email', 'option'); ?></a>
+                           href="mailto:<?php the_field('email', 'option'); ?>"><?php the_field('email', 'option'); ?></a>
                     </div>
                 </div>
 
