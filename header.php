@@ -97,7 +97,11 @@
                         <a class="mobile-menu__email" href="mailto:<?php the_field('email', 'option'); ?>">
                             <?php the_field('email', 'option'); ?>
                         </a>
-                        <div class="mobile-menu__address"><?php the_field('adress', 'option'); ?></div>
+                        
+												
+                        <div class="mobile-menu__address"><strong>Warehouse address:</strong><br> <?php the_field('warehouse_address', 'option'); ?></div>
+                        
+                        <div class="mobile-menu__address"><strong>Company registered at:</strong><br> <?php the_field('registration_address', 'option'); ?></div>
                     </div>
                     <div class="mobile-menu__social">
                         <!--                         <a href="<?php the_field('vk_link', 'option'); ?>">

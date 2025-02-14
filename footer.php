@@ -211,7 +211,8 @@
                     <div class="footer__contacts">
                         <div class="footer__inner">
                             <div class="footer__work">10:00-22:00</div>
-                            <div class="footer__address"><?php the_field('adress', 'option'); ?></div>
+                            <div class="footer__address"><strong>Warehouse (For Shipments & Returns in the USA):</strong> <?php the_field('warehouse_address', 'option'); ?></div>
+														<div class="footer__address"><strong>Company Registration & Billing Address:</strong> <?php the_field('registration_address', 'option'); ?></div>
                         </div>
                         <div class="footer__inner">
                             <a class="footer__link" href="mailto:<?php the_field('email', 'option'); ?>">
@@ -232,44 +233,6 @@
             </div>
         </div>
     </div>
-<!--     <div class="footer__bottom">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="footer__info">
-                        <span>ИП Васильев</span>
-                        <span>ИНН 110209963700</span>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="footer__social">
-                        <h5 class="footer__social-title">Мы в социальных сетях</h5>
-                        <div>
-                            <a class="footer__social-link" href="<?php the_field('vk_link', 'option'); ?>">
-                                <svg class="icon">
-                                    <use xlink:href="<?php echo get_template_directory_uri(); ?>/assets/svg/sprite/sprite.svg#vk"></use>
-                                </svg>
-                            </a>
-                            <a class="footer__social-link" href="<?php the_field('inst_link', 'option'); ?>">
-                                <svg class="icon">
-                                    <use xlink:href="<?php echo get_template_directory_uri(); ?>/assets/svg/sprite/sprite.svg#instagram"></use>
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4">
-                    <div class="footer__dev">
-                        <a href="https://richbee.ru/">
-                            <svg class="icon">
-                                <use xlink:href="<?php echo get_template_directory_uri(); ?>/assets//svg/sprite/sprite.svg#richbee"></use>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </footer>
 
 

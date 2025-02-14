@@ -226,17 +226,27 @@ get_header(); ?>
 	
 	
 	
+   
 	 <div class="contacts">
         <div class="container">
-            <h2 class="title">Contacts</h2>
+            <h2 class="title" style="margin-top: 50px">Contacts</h2>
             <div class="contacts__inner">
                 <div class="contacts__info">
+										<div class="contacts__info-item">
+                        <svg class="icon">
+                            <use xlink:href="<?php echo get_template_directory_uri(); ?>/assets/svg/sprite/sprite.svg#cart"></use>
+                        </svg>
+                        <h4 class="contacts__info-title">Warehouse (For Shipments & Returns in the USA)</h4>
+                        <div class="contacts__info-text"><?php the_field('warehouse_address', 'option'); ?></div>
+												<div class="contacts__info-text" style="padding-top: 20px; font-style: italic;"><?php the_field('warehouse_address_note', 'option'); ?></div>
+                    </div>
                     <div class="contacts__info-item">
                         <svg class="icon">
                             <use xlink:href="<?php echo get_template_directory_uri(); ?>/assets/svg/sprite/sprite.svg#map"></use>
                         </svg>
-                        <h4 class="contacts__info-title">Address</h4>
-                        <div class="contacts__info-text"><?php the_field('adress', 'option'); ?></div>
+                        <h4 class="contacts__info-title">Company Registration & Billing Address</h4>
+                        <div class="contacts__info-text"><?php the_field('registration_address', 'option'); ?></div>
+												<div class="contacts__info-text" style="padding-top: 20px; font-style: italic;"><?php the_field('registration_address_note', 'option'); ?></div>
                     </div>
                     <div class="contacts__info-item">
                         <svg class="icon">
@@ -261,6 +271,7 @@ get_header(); ?>
             </div>
         </div>
     </div>
+	
 	
 
 <?php
