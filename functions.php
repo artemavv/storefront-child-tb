@@ -334,14 +334,16 @@ add_action('wp_enqueue_scripts', function () {
 }, 11);
 
 
-/* Changes done by Gauri Kaushik */
-function customchanges_scripts()
+function enqueue_theme_styles()
 {
 	$vsn = time();
-	// enqueue style
+	
 	wp_enqueue_style('gk-custom', get_template_directory_uri() . '/assets/css/gk-custom.css', array(), $vsn);
+  
+  wp_enqueue_style('app-sass', get_template_directory_uri() . '/assets/css/app-sass.css', array(), $vsn);
+  wp_enqueue_style('app', get_template_directory_uri() . '/assets/css/app.css', array(), $vsn);
 }
-add_action('wp_enqueue_scripts', 'customchanges_scripts');
+add_action('wp_enqueue_scripts', 'enqueue_theme_styles');
 
 
 // Reject account registration for emails ending with: "@baikcm.ru and @bheps.com"

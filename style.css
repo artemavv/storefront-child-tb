@@ -34,6 +34,8 @@ Images License: GNU General Public License v2 or later
  * normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css
  */
 
+/*
+
 html {
 	font-family: sans-serif;
 	-ms-text-size-adjust: 100%;
@@ -681,7 +683,7 @@ body {
 	color: #3b3c3f;
 	padding: 1.618em 0 3.706325903em
 }
-
+/*
 .site-footer h1,
 .site-footer h2,
 .site-footer h3,
@@ -1382,7 +1384,7 @@ fieldset legend {
 	display: inline-block;
 	border-radius: 0
 }
-
+*/
 .wp-caption {
 	margin-bottom: 1em;
 	max-width: 100%
@@ -1563,7 +1565,7 @@ button.menu-toggle::after {
 .main-navigation .menu {
 	clear: both
 }
-
+/*
 .handheld-navigation,
 .nav-menu,
 .main-navigation div.menu>ul:not(.nav-menu) {
@@ -2486,3 +2488,5 @@ button.menu-toggle::after {
     width:100%;
   }
 }
+
+*/
