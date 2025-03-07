@@ -73,6 +73,20 @@ h3 {
   line-height: 38px;
   color: #333333;
 }
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	clear: both;
+	font-weight: 300;
+	margin: 0 0 .5407911001em;
+	color: #131315
+}
+
 .title {
   margin: 0 0 40px;
   font-family: "Lora", "Times New Roman", Times, serif;
@@ -3892,10 +3906,13 @@ a:focus, button:focus, .button.alt:focus, input:focus, textarea:focus, input[typ
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 19px;
   color: #777777;
   transition: color 0.3s ease-in;
+  padding: 5px;
+  text-align: center;
+    
 }
 .footer-menu__list a:last-of-type {
   margin-bottom: 0;
@@ -7368,15 +7385,9 @@ body .btn-outline-primary:hover {
 .contacts__inner .contacts__map iframe {
 	height: 615px;
 }
-.contacts__inner {
-	align-items: center;
-	display: block;
-    width: 80%;
-    margin: 0 auto;
-}
+
 .contacts__inner .contacts__info {
-	padding: 40px;
-	/*margin-right: -50px;*/
+	padding: 40px;	
 	position: relative;
 	z-index: 1;
 }
@@ -7816,6 +7827,9 @@ table {
 	border-collapse: separate;
 }
 
+
+/* Tweaks for checkout page */
+
 .checkout-info-block {
   float:right;
   clear: right;
@@ -7846,4 +7860,24 @@ table {
     border: none;
     height: 43.7px;
     padding-left: 10px;
+}
+
+.woocommerce-cart-form tr.woocommerce-cart-form__cart-item td.product-price {
+    font-size: 1.5em;
+}
+
+tr.woocommerce-shipping-totals ul#shipping_method li input.shipping_method {
+    font: inherit;
+    width: 1.25em;
+    height: 1.25em;
+    border: 0.15em solid #444;
+    border-radius: 13px;
+    position: relative;
+    top: 6px;
+}
+
+ul#shipping_method label {
+    max-width: 200px;
+    padding-left: 10px;
+    display: inline;
 }

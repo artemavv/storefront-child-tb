@@ -167,6 +167,10 @@ if ( ! class_exists( 'Storefront_WooCommerce' ) ) :
 			if ( ! class_exists( 'Storefront_Sticky_Add_to_Cart' ) && is_product() ) {
 				wp_register_script( 'storefront-sticky-add-to-cart', get_template_directory_uri() . '/assets/js/sticky-add-to-cart' . $suffix . '.js', array(), $storefront_version, true );
 			}
+      
+      if ( is_checkout() ) {      
+  			//wp_enqueue_script( 'storefront-checkout-tweaks', get_template_directory_uri() . '/assets/js/checkout-tweaks.js', array(), $storefront_version, true );
+      }
 		}
 
 		/**
