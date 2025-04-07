@@ -112,13 +112,14 @@ get_header(); ?>
 										)); 
 										while ( $loop->have_posts() ): $loop->the_post(); ?>
 								
-								
+                        <?php $thumbnail_url = get_the_post_thumbnail_url( get_the_ID(), "medium_large" ); ?>
+                
 												<?php $product_title = get_the_title(); ?>
                          <div class="col-lg-3 mb-3 d-none d-lg-block">
                        				
 														<a href="<?php the_permalink(); ?>" class="gallery__card">
                             <div class="gallery__card-img">
-                              <img src="<?php echo (get_field('product_cover') ? get_field('product_cover') : get_the_post_thumbnail_url()); ?>" alt="<?php echo $product_title; ?>"/>
+                              <img src="<?php echo (get_field('product_cover') ? get_field('product_cover') : $thumbnail_url ); ?>" alt="<?php echo $product_title; ?>"/>
                             </div>
                             <div class="gallery__innerDesc">
                               <h3 class="gallery__card-title"><?php 
