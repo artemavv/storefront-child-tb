@@ -26,7 +26,7 @@ $storefront = (object) array(
 	 * Initialize all the things.
 	 */
 	'main'       => require 'inc/class-storefront.php',
-	'customizer' => require 'inc/customizer/class-storefront-customizer.php',
+	//'customizer' => require 'inc/customizer/class-storefront-customizer.php',
 );
 
 require 'inc/storefront-functions.php';
@@ -42,7 +42,7 @@ if (class_exists('Jetpack')) {
 
 if (storefront_is_woocommerce_activated()) {
 	$storefront->woocommerce            = require 'inc/woocommerce/class-storefront-woocommerce.php';
-	$storefront->woocommerce_customizer = require 'inc/woocommerce/class-storefront-woocommerce-customizer.php';
+	//$storefront->woocommerce_customizer = require 'inc/woocommerce/class-storefront-woocommerce-customizer.php';
 
 	require 'inc/woocommerce/class-storefront-woocommerce-adjacent-products.php';
 
