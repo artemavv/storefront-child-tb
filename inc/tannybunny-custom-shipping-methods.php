@@ -110,6 +110,12 @@ if ( ! class_exists( 'From_USA_Shipping_Method' ) ) {
 				$shipping = new TannyBunny_Custom_Shipping_Helper( $wc_product, $country );
 				$cost = $shipping->get_delivery_cost( 'standard', 'us' );
 				
+        // if a country is not in "FREE DELIVERY" list, make the standard delivery unavailable (when shipping from USA) 
+        
+				if ( ! $shipping->is_standard_shipping_available() ) {
+					$cost = -1;
+				}
+        
 				if ( $cost >= 0 ) { // negative value indicates inavailable delivery
 					
 					$dates = $shipping->get_delivery_date_estimate( 'standard', 'us' );

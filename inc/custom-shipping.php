@@ -1248,6 +1248,12 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		if ( self::is_free_delivery_available_for_country( $country, $warehouse_id ) ) {
 			$delivery_settings['cost'] = 0;
 		}
+    else {
+      if ( $warehouse_id == 'us' ) { // if a country is not in "FREE DELIVERY" list, make the standard delivery unavailable (when shipping from USA) 
+        
+        $delivery_settings['cost'] = self::DELIVERY_NOT_FOUND;
+      }
+    }
 		
 		// include processing time required by warehouse
 		
