@@ -41,6 +41,10 @@ class TannyBunny_Custom_Shipping_Core {
 		'us_shipping_cost'           => 0,
 		'us_shipping_cost_express'   => 12,
 		'us_free_delivery_countries' => '',
+    'us_filter_message_usa'      => 'Free shipping for USA!',
+    'us_filter_message_free'     => 'Free shipping: 5-7 working days ( available for {country} )',
+    'us_filter_message_standard' => 'Expedited shipping via FedEx is available for $7.5',
+    'us_filter_message_everywhere' => 'Products can be shipped from either the USA or Armenia. Check delivery times and costs on the product page.',
 		
 		'am_delivery_min'            => 7,
 		'am_delivery_max'            => 14,
@@ -51,6 +55,8 @@ class TannyBunny_Custom_Shipping_Core {
 		'am_shipping_cost'           => 0,
 		'am_shipping_cost_express'   => 12,
 		'am_free_delivery_countries' => '*',
+    'am_filter_message_free'     => 'Shipping: 10-30 days to all countries. Free of charge.',
+    'am_filter_message_standard' => 'Shipping: 10-30 days to all countries for $10'
 	];
 
 	public static $option_values = array();
@@ -248,6 +254,9 @@ EOT;
 			case 'hidden':
 				$input_html = self::make_hidden_field($field, $value);
 				break;
+      case 'note':
+				$input_html = self::make_note($field, $value);
+				break;
 			default:
 				$input_html = '[Unknown field type "' . $field['type'] . '" ]';
 		}
@@ -329,6 +338,19 @@ EOT;
 		$out = <<<EOT
       <input type="text" id="tbd_{$field['id']}" name="{$field['name']}" size="{$size}"value="{$value}" class="tbd-text-field">
 EOT;
+		return $out;
+	}
+  
+  
+	/**
+	 * Generates HTML code for a note
+	 * @param array $field
+	 * @param array $value
+	 */
+	public static function make_note($field, $value) {
+
+		$out = "<p>$value</p>";
+      
 		return $out;
 	}
 
@@ -415,7 +437,331 @@ EOT;
 EOT;
 		return $out;
 	}
+  
+  
+  public static function get_warehouse_note( $string_name, $country_name = '' ) {
+    
+    if ( $country_name ) {
+      $country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
+      $country_name = TannyBunny_Custom_Shipping_Helper::get_country_name( $country );
+    }
+    
+    $warehouse_note = TannyBunny_Custom_Shipping_Helper::$option_values[ $string_name ];
+    
+    $result = self::extract_and_convert_price( str_replace( '{country}', $country_name, $warehouse_note ) );
+   
+    return $result;
+  }
+  
+  public static function extract_and_convert_price( $string ) {
+    
+    $matches = array();
+    
+    if ( preg_match('/\{(\d+(?:[,.]\d+)?)\}/', $string, $matches) ) {
+      $price = $matches[1];
+      
+      
+      $result = str_replace( '{' . $price . '}', self::convert_price( floatval($price) ), $string );
+    }
+    else {
+      $result = $string;
+    }
+    
+    return $result;
+  }
+  
+  
+  public static function convert_price( $price ) { 
+    
+    $wmc = WOOMULTI_CURRENCY_Data::get_ins();
 
+    $currency = $wmc->get_current_currency();
+
+    $selected_currencies = $wmc->get_list_currencies();
+
+    if ( $currency && isset( $selected_currencies[ $currency ] ) && is_array( $selected_currencies[ $currency ] ) ) {
+
+      $price = round( wmc_get_price( $price, $currency ), 1 );
+
+      $data   = $selected_currencies[ $currency ];
+      $format = WOOMULTI_CURRENCY_Data::get_price_format( $data['pos'] );
+      $args   = array(
+        'currency'     => $currency,
+        'price_format' => $format
+      );
+
+      if ( isset( $data['decimals'] ) ) {
+        $args['decimals'] = absint( $data['decimals'] );
+      }
+
+      $converted_price = wc_price( $price, $args );
+    }
+    
+    return $converted_price;
+  }
+
+  public static function get_country_name( $country_code = 'JP' ) {
+		
+		$countries = [
+			"Afghanistan" => "AF",
+			"Åland Islands" => "AX",
+			"Albania" => "AL",
+			"Algeria" => "DZ",
+			"American Samoa" => "AS",
+			"Andorra" => "AD",
+			"Angola" => "AO",
+			"Anguilla" => "AI",
+			"Antarctica" => "AQ",
+			"Antigua and Barbuda" => "AG",
+			"Argentina" => "AR",
+			"Armenia" => "AM",
+			"Aruba" => "AW",
+			"Australia" => "AU",
+			"Austria" => "AT",
+			"Azerbaijan" => "AZ",
+			"Bahamas" => "BS",
+			"Bahrain" => "BH",
+			"Bangladesh" => "BD",
+			"Barbados" => "BB",
+			"Belarus" => "BY",
+			"Belgium" => "BE",
+			"Belize" => "BZ",
+			"Benin" => "BJ",
+			"Bermuda" => "BM",
+			"Bhutan" => "BT",
+			"Bolivia" => "BO",
+			//"Bonaire, Sint Eustatius and Saba" => "BQ",
+			"Bosnia and Herzegovina" => "BA",
+			"Botswana" => "BW",
+			"Bouvet Island" => "BV",
+			"Brazil" => "BR",
+			"British IOT" => "IO", //"British Indian Ocean Territory" => "IO",
+			"Brunei Darussalam" => "BN",
+			"Bulgaria" => "BG",
+			"Burkina Faso" => "BF",
+			"Burundi" => "BI",
+			"Cambodia" => "KH",
+			"Cameroon" => "CM",
+			"Canada" => "CA",
+			"Cape Verde" => "CV",
+			"Cayman Islands" => "KY",
+			"Central African Republic" => "CF",
+			"Chad" => "TD",
+			"Chile" => "CL",
+			"China" => "CN",
+			"Christmas Island" => "CX",
+			"Cocos (Keeling) Islands" => "CC",
+			"Colombia" => "CO",
+			"Comoros" => "KM",
+			"Congo" => "CG",
+			"Congo" => "CD",
+			"Cook Islands" => "CK",
+			"Costa Rica" => "CR",
+			"Côte d'Ivoire" => "CI",
+			"Croatia" => "HR",
+			"Cuba" => "CU",
+			"Curaçao" => "CW",
+			"Cyprus" => "CY",
+			"Czech Republic" => "CZ",
+			"Denmark" => "DK",
+			"Djibouti" => "DJ",
+			"Dominica" => "DM",
+			"Dominican Republic" => "DO",
+			"Ecuador" => "EC",
+			"Egypt" => "EG",
+			"El Salvador" => "SV",
+			"Equatorial Guinea" => "GQ",
+			"Eritrea" => "ER",
+			"Estonia" => "EE",
+			"Ethiopia" => "ET",
+			"Falkland Islands (Malvinas)" => "FK",
+			"Faroe Islands" => "FO",
+			"Fiji" => "FJ",
+			"Finland" => "FI",
+			"France" => "FR",
+			"French Guiana" => "GF",
+			"French Polynesia" => "PF",
+			"French Southern Territories" => "TF",
+			"Gabon" => "GA",
+			"Gambia" => "GM",
+			"Georgia" => "GE",
+			"Germany" => "DE",
+			"Ghana" => "GH",
+			"Gibraltar" => "GI",
+			"Greece" => "GR",
+			"Greenland" => "GL",
+			"Grenada" => "GD",
+			"Guadeloupe" => "GP",
+			"Guam" => "GU",
+			"Guatemala" => "GT",
+			"Guernsey" => "GG",
+			"Guinea" => "GN",
+			"Guinea-Bissau" => "GW",
+			"Guyana" => "GY",
+			"Haiti" => "HT",
+			"Heard Island and McDonald Islands" => "HM",
+			"Vatican City" => "VA",
+			"Honduras" => "HN",
+			"Hong Kong" => "HK",
+			"Hungary" => "HU",
+			"Iceland" => "IS",
+			"India" => "IN",
+			"Indonesia" => "ID",
+			"Iran" => "IR",
+			"Iraq" => "IQ",
+			"Ireland" => "IE",
+			"Isle of Man" => "IM",
+			"Israel" => "IL",
+			"Italy" => "IT",
+			"Jamaica" => "JM",
+			"Japan" => "JP",
+			"Jersey" => "JE",
+			"Jordan" => "JO",
+			"Kazakhstan" => "KZ",
+			"Kenya" => "KE",
+			"Kiribati" => "KI",
+			"North Korea" => "KP",
+			"Korea" => "KR",
+			"Kuwait" => "KW",
+			"Kyrgyzstan" => "KG",
+			"Laos" => "LA",
+			"Latvia" => "LV",
+			"Lebanon" => "LB",
+			"Lesotho" => "LS",
+			"Liberia" => "LR",
+			"Libya" => "LY",
+			"Liechtenstein" => "LI",
+			"Lithuania" => "LT",
+			"Luxembourg" => "LU",
+			"Macao" => "MO",
+			"Macedonia" => "MK",
+			"Madagascar" => "MG",
+			"Malawi" => "MW",
+			"Malaysia" => "MY",
+			"Maldives" => "MV",
+			"Mali" => "ML",
+			"Malta" => "MT",
+			"Marshall Islands" => "MH",
+			"Martinique" => "MQ",
+			"Mauritania" => "MR",
+			"Mauritius" => "MU",
+			"Mayotte" => "YT",
+			"Mexico" => "MX",
+			"Micronesia" => "FM", //"Micronesia, Federated States of" => "FM",
+			"Moldova" => "MD",
+			"Monaco" => "MC",
+			"Mongolia" => "MN",
+			"Montenegro" => "ME",
+			"Montserrat" => "MS",
+			"Morocco" => "MA",
+			"Mozambique" => "MZ",
+			"Myanmar" => "MM",
+			"Namibia" => "NA",
+			"Nauru" => "NR",
+			"Nepal" => "NP",
+			"Netherlands" => "NL",
+			"New Caledonia" => "NC",
+			"New Zealand" => "NZ",
+			"Nicaragua" => "NI",
+			"Niger" => "NE",
+			"Nigeria" => "NG",
+			"Niue" => "NU",
+			"Norfolk Island" => "NF",
+			"Northern Mariana Islands" => "MP",
+			"Norway" => "NO",
+			"Oman" => "OM",
+			"Pakistan" => "PK",
+			"Palau" => "PW",
+			"Palestine, State of" => "PS",
+			"Panama" => "PA",
+			"Papua New Guinea" => "PG",
+			"Paraguay" => "PY",
+			"Peru" => "PE",
+			"Philippines" => "PH",
+			"Pitcairn" => "PN",
+			"Poland" => "PL",
+			"Portugal" => "PT",
+			"Puerto Rico" => "PR",
+			"Qatar" => "QA",
+			"Réunion" => "RE",
+			"Romania" => "RO",
+			"Russia" => "RU",
+			"Rwanda" => "RW",
+			"Saint Barthélemy" => "BL",
+			"Saint Helena" => "SH",
+			"Saint Kitts and Nevis" => "KN",
+			"Saint Lucia" => "LC",
+			"Saint Martin" => "MF",
+			"Saint Pierre and Miquelon" => "PM",
+			"Saint Vincent and the Grenadines" => "VC",
+			"Samoa" => "WS",
+			"San Marino" => "SM",
+			"Sao Tome and Principe" => "ST",
+			"Saudi Arabia" => "SA",
+			"Senegal" => "SN",
+			"Serbia" => "RS",
+			"Seychelles" => "SC",
+			"Sierra Leone" => "SL",
+			"Singapore" => "SG",
+			"Sint Maarten" => "SX",
+			"Slovakia" => "SK",
+			"Slovenia" => "SI",
+			"Solomon Islands" => "SB",
+			"Somalia" => "SO",
+			"South Africa" => "ZA",
+			"South Georgia" => "GS",
+			"South Sudan" => "SS",
+			"Spain" => "ES",
+			"Sri Lanka" => "LK",
+			"Sudan" => "SD",
+			"Suriname" => "SR",
+			"Svalbard and Jan Mayen" => "SJ",
+			"Eswatini" => "SZ",
+			"Sweden" => "SE",
+			"Switzerland" => "CH",
+			"Syria" => "SY",
+			"Taiwan" => "TW",
+			"Tajikistan" => "TJ",
+			"Tanzania" => "TZ",
+			"Thailand" => "TH",
+			"Timor-Leste" => "TL",
+			"Togo" => "TG",
+			"Tokelau" => "TK",
+			"Tonga" => "TO",
+			"Trinidad and Tobago" => "TT",
+			"Tunisia" => "TN",
+			"Turkey" => "TR",
+			"Turkmenistan" => "TM",
+			"Turks and Caicos Islands" => "TC",
+			"Tuvalu" => "TV",
+			"Uganda" => "UG",
+			"Ukraine" => "UA",
+			"United Arab Emirates" => "AE",
+			"United Kingdom" => "GB",
+			"United States" => "US",
+			"United States Minor Outlying Islands" => "UM",
+			"Uruguay" => "UY",
+			"Uzbekistan" => "UZ",
+			"Vanuatu" => "VU",
+			"Venezuela" => "VE",
+			"Viet Nam" => "VN",
+			"Virgin Islands, British" => "VG",
+			"Virgin Islands, U.S." => "VI",
+			"Wallis and Futuna" => "WF",
+			"Western Sahara" => "EH",
+			"Yemen" => "YE",
+			"Zambia" => "ZM",
+			"Zimbabwe" => "ZW"
+		];
+		
+		if ( in_array( $country_code, $countries ) ) {
+		
+			$codes = array_flip($countries);
+			return $codes[$country_code];
+		}
+		
+		return $country_code;
+	}
 }
 
 /**
@@ -583,6 +929,40 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 				'rows' => 6,
 				'value' => self::$option_values['us_free_delivery_countries'],
 			),
+      array(
+				'name' => "us_filter_message_usa",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when shipping from USA to USA',
+				'value' => self::$option_values['us_filter_message_usa'],
+			),
+      array(
+				'name' => "us_filter_message_free",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when free shipping from USA is available',
+				'value' => self::$option_values['us_filter_message_free'],
+			),
+      array(
+				'name' => "us_filter_message_standard",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when free shipping from USA is NOT available',
+				'value' => self::$option_values['us_filter_message_standard'],
+			),
+      array(
+				'name' => "note",
+				'type' => 'note',
+				'value' => '<strong>{country}</strong> will be automatically replaced by the visitor\'s country name'
+        . '<br><strong>{123}</strong> will be replaced with $123 converted to visitor\'s currency',
+			),
+      array(
+				'name' => "us_filter_message_everywhere",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when search is for both shipping from USA and Armenia',
+				'value' => self::$option_values['us_filter_message_everywhere'],
+			),
 		);
 		
 		$Armenia_delivery_settings_field_set = array(
@@ -657,6 +1037,20 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 				'rows' => 6,
 				'value' => self::$option_values['am_free_delivery_countries'],
 			),
+      array(
+				'name' => "am_filter_message_free",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when free shipping from Armenia is available',
+				'value' => self::$option_values['am_filter_message_free'],
+			),
+      array(
+				'name' => "am_filter_message_standard",
+				'type' => 'text',
+        'size' => 45,
+				'label' => 'Filter note when free shipping from Armenia is NOT available',
+				'value' => self::$option_values['am_filter_message_standard'],
+			),
 		);
 		
 		?>
@@ -706,6 +1100,9 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 					</tbody>
 				</table>
 
+        <h4>List of countries with free shipping from USA</h4>
+        <?php echo self::render_free_delivery_countries_list( self::$option_values['us_free_delivery_countries'] ); ?>
+        
 				<p class="submit">  
 						<input type="submit" id="tbd-button-save" name="tbd-button-save" class="button button-primary" style="" value="<?php echo self::ACTION_SAVE_OPTIONS; ?>" />
 				</p>
@@ -714,6 +1111,23 @@ class TannyBunny_Custom_Shipping_Admin extends TannyBunny_Custom_Shipping_Core {
 
 		<?php
 	}
+  
+  public static function render_free_delivery_countries_list( $countries_csv ) {
+    
+    $list_html = '<ul>';
+    $countries = array_map( 'trim', explode( ',', $countries_csv ) );
+    
+    sort( $countries );
+    
+    foreach ( $countries as $country_code ) {
+      $country_name = self::get_country_name( $country_code ); 
+      $list_html .= "<li><strong>$country_code</strong> - $country_name </li>";
+    }
+    
+    $list_html .= '</ul>';
+    
+    return $list_html;
+  }
 }
 
 /**
@@ -1372,268 +1786,6 @@ class TannyBunny_Custom_Shipping_Helper extends TannyBunny_Custom_Shipping_Core 
 		return $out;
 	}
 	
-	public static function get_country_name( $country_code = 'JP' ) {
-		
-		$countries = [
-			"Afghanistan" => "AF",
-			"Åland Islands" => "AX",
-			"Albania" => "AL",
-			"Algeria" => "DZ",
-			"American Samoa" => "AS",
-			"Andorra" => "AD",
-			"Angola" => "AO",
-			"Anguilla" => "AI",
-			"Antarctica" => "AQ",
-			"Antigua and Barbuda" => "AG",
-			"Argentina" => "AR",
-			"Armenia" => "AM",
-			"Aruba" => "AW",
-			"Australia" => "AU",
-			"Austria" => "AT",
-			"Azerbaijan" => "AZ",
-			"Bahamas" => "BS",
-			"Bahrain" => "BH",
-			"Bangladesh" => "BD",
-			"Barbados" => "BB",
-			"Belarus" => "BY",
-			"Belgium" => "BE",
-			"Belize" => "BZ",
-			"Benin" => "BJ",
-			"Bermuda" => "BM",
-			"Bhutan" => "BT",
-			"Bolivia" => "BO",
-			//"Bonaire, Sint Eustatius and Saba" => "BQ",
-			"Bosnia and Herzegovina" => "BA",
-			"Botswana" => "BW",
-			"Bouvet Island" => "BV",
-			"Brazil" => "BR",
-			"British IOT" => "IO", //"British Indian Ocean Territory" => "IO",
-			"Brunei Darussalam" => "BN",
-			"Bulgaria" => "BG",
-			"Burkina Faso" => "BF",
-			"Burundi" => "BI",
-			"Cambodia" => "KH",
-			"Cameroon" => "CM",
-			"Canada" => "CA",
-			"Cape Verde" => "CV",
-			"Cayman Islands" => "KY",
-			"Central African Republic" => "CF",
-			"Chad" => "TD",
-			"Chile" => "CL",
-			"China" => "CN",
-			"Christmas Island" => "CX",
-			"Cocos (Keeling) Islands" => "CC",
-			"Colombia" => "CO",
-			"Comoros" => "KM",
-			"Congo" => "CG",
-			"Congo" => "CD",
-			"Cook Islands" => "CK",
-			"Costa Rica" => "CR",
-			"Côte d'Ivoire" => "CI",
-			"Croatia" => "HR",
-			"Cuba" => "CU",
-			"Curaçao" => "CW",
-			"Cyprus" => "CY",
-			"Czech Republic" => "CZ",
-			"Denmark" => "DK",
-			"Djibouti" => "DJ",
-			"Dominica" => "DM",
-			"Dominican Republic" => "DO",
-			"Ecuador" => "EC",
-			"Egypt" => "EG",
-			"El Salvador" => "SV",
-			"Equatorial Guinea" => "GQ",
-			"Eritrea" => "ER",
-			"Estonia" => "EE",
-			"Ethiopia" => "ET",
-			"Falkland Islands (Malvinas)" => "FK",
-			"Faroe Islands" => "FO",
-			"Fiji" => "FJ",
-			"Finland" => "FI",
-			"France" => "FR",
-			"French Guiana" => "GF",
-			"French Polynesia" => "PF",
-			"French Southern Territories" => "TF",
-			"Gabon" => "GA",
-			"Gambia" => "GM",
-			"Georgia" => "GE",
-			"Germany" => "DE",
-			"Ghana" => "GH",
-			"Gibraltar" => "GI",
-			"Greece" => "GR",
-			"Greenland" => "GL",
-			"Grenada" => "GD",
-			"Guadeloupe" => "GP",
-			"Guam" => "GU",
-			"Guatemala" => "GT",
-			"Guernsey" => "GG",
-			"Guinea" => "GN",
-			"Guinea-Bissau" => "GW",
-			"Guyana" => "GY",
-			"Haiti" => "HT",
-			"Heard Island and McDonald Islands" => "HM",
-			"Vatican City" => "VA",
-			"Honduras" => "HN",
-			"Hong Kong" => "HK",
-			"Hungary" => "HU",
-			"Iceland" => "IS",
-			"India" => "IN",
-			"Indonesia" => "ID",
-			"Iran" => "IR",
-			"Iraq" => "IQ",
-			"Ireland" => "IE",
-			"Isle of Man" => "IM",
-			"Israel" => "IL",
-			"Italy" => "IT",
-			"Jamaica" => "JM",
-			"Japan" => "JP",
-			"Jersey" => "JE",
-			"Jordan" => "JO",
-			"Kazakhstan" => "KZ",
-			"Kenya" => "KE",
-			"Kiribati" => "KI",
-			"North Korea" => "KP",
-			"Korea" => "KR",
-			"Kuwait" => "KW",
-			"Kyrgyzstan" => "KG",
-			"Laos" => "LA",
-			"Latvia" => "LV",
-			"Lebanon" => "LB",
-			"Lesotho" => "LS",
-			"Liberia" => "LR",
-			"Libya" => "LY",
-			"Liechtenstein" => "LI",
-			"Lithuania" => "LT",
-			"Luxembourg" => "LU",
-			"Macao" => "MO",
-			"Macedonia" => "MK",
-			"Madagascar" => "MG",
-			"Malawi" => "MW",
-			"Malaysia" => "MY",
-			"Maldives" => "MV",
-			"Mali" => "ML",
-			"Malta" => "MT",
-			"Marshall Islands" => "MH",
-			"Martinique" => "MQ",
-			"Mauritania" => "MR",
-			"Mauritius" => "MU",
-			"Mayotte" => "YT",
-			"Mexico" => "MX",
-			"Micronesia" => "FM", //"Micronesia, Federated States of" => "FM",
-			"Moldova" => "MD",
-			"Monaco" => "MC",
-			"Mongolia" => "MN",
-			"Montenegro" => "ME",
-			"Montserrat" => "MS",
-			"Morocco" => "MA",
-			"Mozambique" => "MZ",
-			"Myanmar" => "MM",
-			"Namibia" => "NA",
-			"Nauru" => "NR",
-			"Nepal" => "NP",
-			"Netherlands" => "NL",
-			"New Caledonia" => "NC",
-			"New Zealand" => "NZ",
-			"Nicaragua" => "NI",
-			"Niger" => "NE",
-			"Nigeria" => "NG",
-			"Niue" => "NU",
-			"Norfolk Island" => "NF",
-			"Northern Mariana Islands" => "MP",
-			"Norway" => "NO",
-			"Oman" => "OM",
-			"Pakistan" => "PK",
-			"Palau" => "PW",
-			"Palestine, State of" => "PS",
-			"Panama" => "PA",
-			"Papua New Guinea" => "PG",
-			"Paraguay" => "PY",
-			"Peru" => "PE",
-			"Philippines" => "PH",
-			"Pitcairn" => "PN",
-			"Poland" => "PL",
-			"Portugal" => "PT",
-			"Puerto Rico" => "PR",
-			"Qatar" => "QA",
-			"Réunion" => "RE",
-			"Romania" => "RO",
-			"Russia" => "RU",
-			"Rwanda" => "RW",
-			"Saint Barthélemy" => "BL",
-			"Saint Helena" => "SH",
-			"Saint Kitts and Nevis" => "KN",
-			"Saint Lucia" => "LC",
-			"Saint Martin" => "MF",
-			"Saint Pierre and Miquelon" => "PM",
-			"Saint Vincent and the Grenadines" => "VC",
-			"Samoa" => "WS",
-			"San Marino" => "SM",
-			"Sao Tome and Principe" => "ST",
-			"Saudi Arabia" => "SA",
-			"Senegal" => "SN",
-			"Serbia" => "RS",
-			"Seychelles" => "SC",
-			"Sierra Leone" => "SL",
-			"Singapore" => "SG",
-			"Sint Maarten" => "SX",
-			"Slovakia" => "SK",
-			"Slovenia" => "SI",
-			"Solomon Islands" => "SB",
-			"Somalia" => "SO",
-			"South Africa" => "ZA",
-			"South Georgia" => "GS",
-			"South Sudan" => "SS",
-			"Spain" => "ES",
-			"Sri Lanka" => "LK",
-			"Sudan" => "SD",
-			"Suriname" => "SR",
-			"Svalbard and Jan Mayen" => "SJ",
-			"Eswatini" => "SZ",
-			"Sweden" => "SE",
-			"Switzerland" => "CH",
-			"Syria" => "SY",
-			"Taiwan" => "TW",
-			"Tajikistan" => "TJ",
-			"Tanzania" => "TZ",
-			"Thailand" => "TH",
-			"Timor-Leste" => "TL",
-			"Togo" => "TG",
-			"Tokelau" => "TK",
-			"Tonga" => "TO",
-			"Trinidad and Tobago" => "TT",
-			"Tunisia" => "TN",
-			"Turkey" => "TR",
-			"Turkmenistan" => "TM",
-			"Turks and Caicos Islands" => "TC",
-			"Tuvalu" => "TV",
-			"Uganda" => "UG",
-			"Ukraine" => "UA",
-			"United Arab Emirates" => "AE",
-			"United Kingdom" => "GB",
-			"United States" => "US",
-			"United States Minor Outlying Islands" => "UM",
-			"Uruguay" => "UY",
-			"Uzbekistan" => "UZ",
-			"Vanuatu" => "VU",
-			"Venezuela" => "VE",
-			"Viet Nam" => "VN",
-			"Virgin Islands, British" => "VG",
-			"Virgin Islands, U.S." => "VI",
-			"Wallis and Futuna" => "WF",
-			"Western Sahara" => "EH",
-			"Yemen" => "YE",
-			"Zambia" => "ZM",
-			"Zimbabwe" => "ZW"
-		];
-		
-		if ( in_array( $country_code, $countries ) ) {
-		
-			$codes = array_flip($countries);
-			return $codes[$country_code];
-		}
-		
-		return $country_code;
-	}
 }
 
 add_action( 'admin_menu', array('TannyBunny_Custom_Shipping_Admin', 'add_page_to_menu') );
@@ -1659,8 +1811,9 @@ function display_shipping_conditions_block() {
 	$standard_date_us   = $shipping->get_delivery_date_estimate( 'standard', 'us' );
 	$express_cost       = $shipping->get_delivery_cost( 'express' );
 
-	
+	$express_cost_fm = TannyBunny_Custom_Shipping_Core::convert_price( $express_cost );
 
+  /*
 	$wmc = WOOMULTI_CURRENCY_Data::get_ins();
 
 	$currency = $wmc->get_current_currency();
@@ -1687,6 +1840,8 @@ function display_shipping_conditions_block() {
 	else {
 		$express_cost_fm = wc_price( $express_cost ); 
 	}
+   * 
+   */
 
 	
 	
@@ -1750,10 +1905,12 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 	
 	$filter_value = $_GET['wpf_filter_warehouse'] ?? false;
 
+  TannyBunny_Custom_Shipping_Helper::load_options();
+  
 	switch ( $filter_value ) {
 		case 'from-armenia':
 			$selected = 'from-armenia';
-			$warehouse_note = 'Shipping: 10-30 days to all countries. Free of charge.';
+			$warehouse_note = TannyBunny_Custom_Shipping_Helper::get_warehouse_note( 'am_filter_message_free' );
 			break;
 		case 'from-usa':
 			$selected = 'from-usa';
@@ -1761,16 +1918,20 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 			$country = TannyBunny_Custom_Shipping_Helper::get_customer_country();
       
       if ( $country == 'US' ) {
-        $warehouse_note = "Shipping to USA: 2-5 days. Expedited shipping via FedEx is also available for " . wc_price(7.5) . '.'; 
+        //"Shipping to USA: 2-5 days. Expedited shipping via FedEx is also available for " . wc_price(7.5) . '.'; 
+        $warehouse_note = TannyBunny_Custom_Shipping_Core::get_warehouse_note( 'us_filter_message_usa', 'USA' );        
       }
       else {
         $country_name = TannyBunny_Custom_Shipping_Helper::get_country_name( $country );
 
         if ( TannyBunny_Custom_Shipping_Helper::is_free_shipping_available_for_country( 'us', $country ) ) {
-          $warehouse_note = "Free shipping to $country_name: 5-7 days. Expedited shipping via FedEx is also available for " . wc_price(7.5) . '.';
+          //$warehouse_note = "Free shipping to $country_name: 5-7 days. Expedited shipping via FedEx is also available for " . wc_price(7.5) . '.';
+          $warehouse_note = TannyBunny_Custom_Shipping_Core::get_warehouse_note( 'us_filter_message_free', $country_name );
+          
         }
         else {
-          $warehouse_note = "Shipping to $country_name: 5-7 days."; // Expedited shipping via FedEx is available for " . wc_price(7.5) . '.';
+          //$warehouse_note = "Shipping to $country_name: 5-7 days."; // Expedited shipping via FedEx is available for " . wc_price(7.5) . '.';
+          $warehouse_note = TannyBunny_Custom_Shipping_Core::get_warehouse_note( 'us_filter_message_standard', $country_name );
         }
       }
 			
@@ -1778,7 +1939,7 @@ function tannybunny_shortcode_warehouse_filter( $atts, $content = null ) {
 		case 'armenia%7Cusa':
 		default:
 			$selected = 'all';
-			$warehouse_note = 'Products can be shipped from either the USA or Armenia. Check delivery times and costs on the product page.';
+			$warehouse_note = TannyBunny_Custom_Shipping_Core::get_warehouse_note( 'us_filter_message_everywhere', $country_name );
 	}
 
 	$params = $_GET;
