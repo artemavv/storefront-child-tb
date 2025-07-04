@@ -26,7 +26,7 @@ $storefront = (object) array(
 	 * Initialize all the things.
 	 */
 	'main'       => require 'inc/class-storefront.php',
-	//'customizer' => require 'inc/customizer/class-storefront-customizer.php',
+	'customizer' => require 'inc/customizer/class-storefront-customizer.php',
 );
 
 require 'inc/storefront-functions.php';
@@ -42,7 +42,7 @@ if (class_exists('Jetpack')) {
 
 if (storefront_is_woocommerce_activated()) {
 	$storefront->woocommerce            = require 'inc/woocommerce/class-storefront-woocommerce.php';
-	//$storefront->woocommerce_customizer = require 'inc/woocommerce/class-storefront-woocommerce-customizer.php';
+	$storefront->woocommerce_customizer = require 'inc/woocommerce/class-storefront-woocommerce-customizer.php';
 
 	require 'inc/woocommerce/class-storefront-woocommerce-adjacent-products.php';
 
@@ -821,6 +821,8 @@ function tb_move_video_item_to_second_place( $html, $post_thumbnail_id ) {
 	return $output;
 }
 
+
+
 add_filter( 'rsfv_default_woo_gallery_video_thumb', 'change_thumbnail_for_video', 10 , 1 );
 
 function change_thumbnail_for_video( $url ) {
@@ -831,4 +833,184 @@ function change_thumbnail_for_video( $url ) {
 	
 	return $new_url;
 }
+
+
+
+function update_attribute_of_all_products() {
+	
+	if ( ! isset( $_GET['update_attribute_of_all_products'] ) ) {
+		return;
+	} 
+
+	if ( isset( $_GET['update_attribute_of_all_products'] ) ) {
+		if ( $_GET['update_attribute_of_all_products'] != date('d'))
+		return;
+	}
+	else {
+		echo 'TEST OK!!'; die();
+	}
+	/*
+	$usa_products = [
+		"124 tree -13-S925-OX-0",
+		"073 cat-19-S925-OX-0",
+		"112 Kitsune -20-S925-P-OX",
+		"115 Neko -21-S925-P-OX",
+		"118 Elf ear -21-S925-P-OX",
+		"134 spider stud white -21-S925-P-C",
+		"092 shamrock -19-S925-OX-0",
+		"092 shamrock -19-S925-P-0",
+		"125 dragon eye -21-S925-P-OX",
+		"023 infinity -13-S925-P-C",
+		"004 lava -13-S925-OX-0",
+		"122 bark -13-S925-OX-0",
+		"128 Death's Head Hawk -21-S925-P-OX",
+		"076 treble clef -19-S925-OX-0",
+		"076 treble clef -19-S925-P-0",
+		"080 celtic -19-S925-OX-0",
+		"080 celtic -19-S925-P-0",
+		"072 fox-19-S925-OX-0",
+		"155 kitsune jackets -23-S925-OX-0",
+		"123 black lace -21-S925-OX",
+		"074 spiderweb-19-S925-OX-0",
+		"074 spiderweb-19-S925-P-0",
+		"132 Spider web ear cuff with chain-21-S925-OX-C",
+		"047 dragon-14-S925-OX-0",
+		"084 pentagram P -19-S925-OX-C",
+		"084 pentagram R -19-S925-OX-C",
+		"017 leaf -13-S925-OX-0",
+		"017 leaf -13-S925-P-0",
+		"078 criss cross -19-S925-P-0",
+		"003 slavic-13-S925-OX-0",
+		"159 wolf -23-S925-OX-C",
+		"020 dragon -13-S925-OX-C",
+		"020 dragon -13-S925-P-C",
+		"151 base wide -23-S925-P-0",
+		"130 Shamrock -21-S925-P-C",
+		"036 snake -14-S925-0X-C ",
+		"059 elf mini -14-S925-P-C",
+		"087 leaves -19-С925-OX-0",
+		"116 Raccoon -21-S925-OX-C",
+		"009 star -13-S925-P-C",
+		"144 magic dew -23-925-S-C",
+		" 078 criss cross -19-S925-P-0",
+		"006 36 cirkonia -13-S925-P-C",
+		"043 nimfa -13-S925-P-C",
+		"031 lace -13-С925-P-0",
+		"105 saturn -19-S925-P-C",
+		"058 Blue alpanite -14-S925-P-C",
+		"143 2 rings -23-S925-P-0",
+		"134 spider stud red -21-S925-OX-C",
+		"134 spider stud white -21-S925-P-C",
+		"133 Spider web ear jackets red -21-S925-OX-C",
+		"133 Spider web ear jackets white -21-S925-P-C",
+		"010 4 rings -13-S925-P-0 ",
+		"028 feather -13-S925-P-0",
+		"139 egypt -21-S925-OX-G",
+		"139 egypt -21-S925-OX-R",
+		"131 cheese and mouse -21-S925-GP-0",
+		"119 ornament-13-S925-OX-0",
+		"089 butterfly -19-S925-OX-0",
+		"089 butterfly -19-S925-P-0",
+		"016 stars and moon -13-S925-P-0",
+		"01 mini -13-S925-P-0",
+		"046 humming -14-S925-OX-C",
+		"104 stingray -19-S925-OX-0",
+		"122 bark -13-S925-OX-0",
+		"103 lotus -19-S925-P-B",
+		"103 lotus -19-S925-P-L",
+		"1009 Butterfly -18-PS925-P",
+		"1040 Fairy wings-19-PS925-WP",
+		"1040 Fairy wings-22-PS925-W",
+		"1009 Butterfly -18-PS925-G",
+		"1040 fairy wings -19-PS925-G",
+		"1058 Monarch -23-PS925-O",
+		"1053 Butterfly -22-PS925-Y",
+		"1009 Butterfly -18-PS925-B",
+		"1017 Dragon -18-PS925-P",
+	];
+	
+// Define the attribute name and the value you want to add.
+$attribute_name = 'pa_warehouse'; 
+
+	$attribute_taxonomy_id_for_armenia = 73;
+	$attribute_taxonomy_id_for_usa = 74; 
+*/
+
+	// Get all product IDs
+	$args = array(
+		'post_type'      => 'product',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'fields'         => 'ids',
+	);
+
+	$attribute_name = 'pa_color';
+
+	$product_ids = get_posts($args);
+
+	foreach ($product_ids as $product_id) {
+		$product = wc_get_product($product_id);
+		
+		
+		if ( $product ) { 
+
+			$sku = $product->get_sku();
+			
+			$attributes = get_post_meta( $product_id, '_product_attributes' );
+
+
+			$new_attributes = $attributes[0];
+
+			//echo('<pre>' . print_r( $attributes , 1 ) . '</pre>' );	die();
+
+			if ( isset($new_attributes[$attribute_name]) ) {
+				$new_attributes[$attribute_name] = array(
+					'name'          => $attribute_name,
+					'value'         => '',
+					'position'      => 4,
+					'is_visible'    => 0,
+					'is_variation'  => 0,
+					'is_taxonomy'   => 1
+				);
+			}
+
+
+			update_post_meta( $product_id, '_product_attributes', $new_attributes );
+/*
+			global $wpdb;
+			$wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES ( $product_id, $attribute_taxonomy_id_for_armenia, 0 )" );
+			
+			if ( in_array( $sku, $usa_products)  ) {
+				$wpdb->query( "INSERT INTO $wpdb->term_relationships (object_id, term_taxonomy_id, term_order) VALUES ( $product_id, $attribute_taxonomy_id_for_usa, 0 )" );
+			}
+*/
+		}
+	}
+}
+add_action('init', 'update_attribute_of_all_products');
+
+
+add_action("wp_footer", "display_geolocation_debug_info_when_requested");
+
+function display_geolocation_debug_info_when_requested() {
+  if (isset($_GET['debug_geolocation'])) {
+    echo 'Your location is detected as: <pre>';
+    
+
+	
+	if ( class_exists( 'WC_Geolocation' ) ) {
+
+		// Initialize built-in geolocation class
+		$location = WC_Geolocation::geolocate_ip();
+
+		
+
+		if ( is_array($location) && isset($location['country']) && $location['country'] != '') {
+			print_r($location['country']);
+		}
+	}
+    echo '</pre>';
+  }
+}
+
 
